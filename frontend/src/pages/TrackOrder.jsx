@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Package, CheckCircle, Truck, CookingPot, Clock, XCircle } from 'lucide-react';
+import {
+    Package,
+    CheckCircle,
+    Truck,
+    CookingPot,
+    Clock,
+    XCircle,
+    Home,
+    ChevronRight,
+} from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../../utils/api';
@@ -105,6 +114,33 @@ export default function OrderTracking() {
         <>
             <div className="min-h-screen bg-gray-50 pt-20 pb-20 sm:pt-16 font-sans">
                 <div className="max-w-[800px] mx-auto px-6 lg:px-4">
+                    {/* Breadcrumbs */}
+                    <nav className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-6">
+                        <button
+                            onClick={() => navigate('/home')}
+                            className="flex items-center gap-1 hover:text-green-600 transition-colors bg-transparent border-0 cursor-pointer p-0 font-medium"
+                        >
+                            <Home size={14} />
+                            Home
+                        </button>
+                        <ChevronRight size={14} className="text-gray-300" />
+                        <button
+                            onClick={() => navigate('/account')}
+                            className="hover:text-green-600 transition-colors bg-transparent border-0 cursor-pointer p-0 font-medium"
+                        >
+                            Account
+                        </button>
+                        <ChevronRight size={14} className="text-gray-300" />
+                        <button
+                            onClick={() => navigate('/orders')}
+                            className="hover:text-green-600 transition-colors bg-transparent border-0 cursor-pointer p-0 font-medium"
+                        >
+                            Orders
+                        </button>
+                        <ChevronRight size={14} className="text-gray-300" />
+                        <span className="text-gray-900 font-bold">Track Order</span>
+                    </nav>
+
                     <h1 className="text-3xl font-extrabold text-gray-900 mb-8 sm:text-2xl sm:mb-6">
                         Track Your Order
                     </h1>

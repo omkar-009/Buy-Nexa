@@ -12,6 +12,8 @@ import {
     Clock,
     LogOut,
     History,
+    ChevronRight,
+    Home,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../../utils/api';
@@ -144,9 +146,22 @@ export default function Account() {
     return (
         <>
             <div className="min-h-screen bg-gray-50 pt-20 pb-16 sm:pt-16 font-sans">
-                <div className="max-w-[800px] mx-auto px-6 lg:px-4 flex flex-col gap-8">
+                <div className="max-w-[800px] mx-auto px-6 lg:px-4 flex flex-col gap-6">
+                    {/* Breadcrumbs */}
+                    <nav className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-2">
+                        <button
+                            onClick={() => navigate('/home')}
+                            className="flex items-center gap-1 hover:text-green-600 transition-colors bg-transparent border-0 cursor-pointer p-0 font-medium"
+                        >
+                            <Home size={14} />
+                            Home
+                        </button>
+                        <ChevronRight size={14} className="text-gray-300" />
+                        <span className="text-gray-900 font-bold">My Account</span>
+                    </nav>
+
                     <h1 className="text-3xl font-extrabold text-gray-900 m-0 sm:text-2xl">
-                        My Account
+                        Account Settings
                     </h1>
 
                     {error && (
