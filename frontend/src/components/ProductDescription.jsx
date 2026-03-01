@@ -13,7 +13,7 @@ import {
     Star,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import api from '../../utils/api';
+import useProductStore from '../store/useProductStore';
 import ProductCard from './ProductCard';
 import CartNotification from './CartNotification';
 
@@ -28,14 +28,20 @@ export default function ProductDescription() {
         notification,
         hideNotification,
     } = useCart();
-    const [product, setProduct] = useState(null);
-    const [similarProducts, setSimilarProducts] = useState([]);
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(true);
+    const {
+        currentProduct: product,
+        loading,
+        error,
+        similarProducts,
+        loadingSimilar,
+        fetchProductById,
+        fetchSimilarProducts,
+        submitRating: storeSubmitRating,
+    } = useProductStore();
+
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [showDetails, setShowDetails] = useState(false);
     const [imageError, setImageError] = useState(false);
-    const [loadingSimilar, setLoadingSimilar] = useState(false);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
     const similarProductsScrollRef = useRef(null);
@@ -44,229 +50,33 @@ export default function ProductDescription() {
     const [submittingRating, setSubmittingRating] = useState(false);
 
     useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                setLoading(true);
-                setError('');
-
-                const res = await api.get(`/products/getproduct/${id}`);
-
-                if (res.data.success) {
-                    const productData = res.data.data;
-
-                    // Handle images - could be string (JSON) or array
-                    let imageFilenames = [];
-                    if (productData.images) {
-                        if (typeof productData.images === 'string') {
-                            try {
-                                imageFilenames = JSON.parse(productData.images);
-                            } catch (e) {
-                                console.error('Failed to parse images string:', e);
-                                imageFilenames = [];
-                            }
-                        } else if (Array.isArray(productData.images)) {
-                            imageFilenames = productData.images;
-                        }
-                    }
-
-                    // Handle imageUrls - should be array of full URLs
-                    let imageUrls = [];
-                    if (productData.imageUrls) {
-                        if (Array.isArray(productData.imageUrls)) {
-                            imageUrls = productData.imageUrls;
-                        } else if (typeof productData.imageUrls === 'string') {
-                            try {
-                                imageUrls = JSON.parse(productData.imageUrls);
-                            } catch (e) {
-                                imageUrls = [];
-                            }
-                        }
-                    }
-
-                    // If imageUrls is empty but we have filenames, construct URLs
-                    if (imageUrls.length === 0 && imageFilenames.length > 0) {
-                        imageUrls = imageFilenames.map(
-                            (filename) =>
-                                `http://localhost:5000/uploads/home_page_products/${filename}`
-                        );
-                    }
-
-                    // Try to infer category from product name if missing
-                    let inferredCategory = productData.category;
-                    if (!inferredCategory || inferredCategory === null || inferredCategory === '') {
-                        const productName = (productData.name || '').toLowerCase();
-                        if (
-                            productName.includes('mango') ||
-                            productName.includes('grapes') ||
-                            productName.includes('custard Apple')
-                        ) {
-                            inferredCategory = 'fruits';
-                        } else if (
-                            productName.includes('honey') ||
-                            productName.includes('turmeric') ||
-                            productName.includes('clarrified butter')
-                        ) {
-                            inferredCategory = 'ProcessedProducts';
-                        } else if (
-                            productName.includes('almonds') ||
-                            productName.includes('cashew') ||
-                            productName.includes('peanuts') ||
-                            productName.includes('pista')
-                        ) {
-                            inferredCategory = 'dryfruits';
-                        } else {
-                            inferredCategory = 'dryfruits';
-                        }
-                        console.log(
-                            'Category inferred from product name:',
-                            productName,
-                            '->',
-                            inferredCategory
-                        );
-                    }
-
-                    // Update product data with processed arrays - preserve category
-                    const updatedProductData = {
-                        ...productData,
-                        category: inferredCategory,
-                        images: imageFilenames,
-                        imageUrls: imageUrls,
-                    };
-
-                    setProduct(updatedProductData);
-                    setImageError(false);
-                    setSelectedImageIndex(0); // Reset to first image
-
-                    // Fetch similar products from same category
-                    if (updatedProductData.category) {
-                        console.log(
-                            'Fetching similar products for category:',
-                            updatedProductData.category,
-                            'excluding:',
-                            id
-                        );
-                        fetchSimilarProducts(updatedProductData.category, id);
-                    } else {
-                        console.warn(
-                            'No category found for product, cannot fetch similar products'
-                        );
-                        console.warn('Product data keys:', Object.keys(updatedProductData));
-                    }
-                } else {
-                    setError(res.data.message || 'Failed to fetch product');
-                }
-            } catch (err) {
-                console.error('Error fetching product:', err);
-                setError(err.response?.data?.message || 'Failed to fetch product details');
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (id) {
-            fetchProduct();
-        }
-    }, [id]);
-
-    const fetchSimilarProducts = async (category, excludeId) => {
-        try {
-            setLoadingSimilar(true);
-            console.log('Fetching similar products - Category:', category, 'ExcludeId:', excludeId);
-
-            // Use the new similar products API endpoint
-            const res = await api.get('/products/similar', {
-                params: {
-                    category: category,
-                    excludeId: excludeId,
-                },
+            fetchProductById(id).then((res) => {
+                if (res.success && res.product.category) {
+                    fetchSimilarProducts(res.product.category, id);
+                }
             });
-
-            console.log('Similar products API response:', res.data);
-
-            if (res.data.success && res.data.data) {
-                console.log('Similar products fetched:', res.data.data.length, 'products');
-                setSimilarProducts(res.data.data);
-                // Check scroll buttons after products are set
-                setTimeout(() => {
-                    checkSimilarScrollButtons();
-                }, 100);
-            } else {
-                console.log('No similar products in response');
-                setSimilarProducts([]);
-            }
-        } catch (err) {
-            console.error('Error fetching similar products from API:', err);
-            console.error('Error details:', err.response?.data);
-
-            // Fallback to category-based fetch if similar API fails
-            try {
-                let endpoint = '';
-                switch (category) {
-                    case 'processed':
-                        endpoint = '/products/processed';
-                        break;
-                    case 'fruits':
-                        endpoint = '/products/fruits';
-                        break;
-                    case 'dryfruits':
-                        endpoint = '/products/dryfruits';
-                        break;
-                    default:
-                        endpoint = '/products/dryfruits';
-                        break;
-                }
-
-                console.log('Trying fallback endpoint:', endpoint);
-                const fallbackRes = await api.get(endpoint);
-                console.log('Fallback response:', fallbackRes.data);
-
-                if (fallbackRes.data.success) {
-                    const filtered = fallbackRes.data.data.filter(
-                        (p) => p.id !== parseInt(excludeId)
-                    );
-                    // Remove slice(0, 4) to get all products
-                    console.log('Filtered similar products:', filtered.length, 'products');
-                    setSimilarProducts(filtered);
-                    // Check scroll buttons after products are set
-                    setTimeout(() => {
-                        checkSimilarScrollButtons();
-                    }, 100);
-                } else {
-                    setSimilarProducts([]);
-                }
-            } catch (fallbackErr) {
-                console.error('Error in fallback similar products fetch:', fallbackErr);
-                setSimilarProducts([]);
-            }
-        } finally {
-            setLoadingSimilar(false);
-            console.log('Finished fetching similar products. Loading:', false);
+            setSelectedImageIndex(0);
+            setImageError(false);
         }
-    };
+    }, [id, fetchProductById, fetchSimilarProducts]);
+
+    // check scroll buttons after products are set
+    useEffect(() => {
+        if (similarProducts.length > 0) {
+            setTimeout(checkSimilarScrollButtons, 100);
+        }
+    }, [similarProducts]);
 
     const submitRating = async (value) => {
-        try {
-            setSubmittingRating(true);
-
-            const res = await api.post(`/products/rate/${id}`, {
-                rating: value,
-            });
-
-            if (res.data.success) {
-                setProduct((prev) => ({
-                    ...prev,
-                    rating: res.data.avg_rating,
-                    rating_count: res.data.rating_count,
-                }));
-
-                setUserRating(value);
-            }
-        } catch (err) {
-            console.error('Rating failed:', err);
-            alert(err.response?.data?.message || 'Please login to rate');
-        } finally {
-            setSubmittingRating(false);
+        setSubmittingRating(true);
+        const res = await storeSubmitRating(id, value);
+        if (res.success) {
+            setUserRating(value);
+        } else {
+            alert(res.message);
         }
+        setSubmittingRating(false);
     };
 
     // Scroll functions for similar products

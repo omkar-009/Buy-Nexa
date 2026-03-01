@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, XCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import CartNotification from '../components/CartNotification';
-import api from '../../utils/api';
+import useProductStore from '../store/useProductStore';
 import ProductCard from '../components/ProductCard';
 import '../App.css';
 
@@ -19,52 +19,18 @@ export default function SearchResults() {
         notification,
         hideNotification,
     } = useCart();
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const {
+        searchResults: products,
+        searchLoading: loading,
+        error,
+        searchProducts,
+    } = useProductStore();
 
     useEffect(() => {
         if (query.trim().length >= 2) {
-            fetchSearchResults(query);
-        } else {
-            setProducts([]);
-            setError('');
+            searchProducts(query);
         }
-    }, [query]);
-
-    const fetchSearchResults = async (searchQuery) => {
-        if (!searchQuery || searchQuery.trim().length < 2) {
-            setProducts([]);
-            return;
-        }
-
-        setLoading(true);
-        setError('');
-        try {
-            const response = await api.get(
-                `/products/search?query=${encodeURIComponent(searchQuery.trim())}`
-            );
-            if (response.data.success) {
-                setProducts(response.data.data || []);
-                if (response.data.data.length === 0) {
-                    setError('No products found');
-                }
-            } else {
-                setError(response.data.message || 'Failed to search products');
-                setProducts([]);
-            }
-        } catch (err) {
-            console.error('Error searching products:', err);
-            setError(
-                err.response?.data?.message ||
-                    err.message ||
-                    'Failed to search products. Please try again.'
-            );
-            setProducts([]);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [query, searchProducts]);
 
     return (
         <>

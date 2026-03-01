@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../../utils/api';
+import useOrderStore from '../store/useOrderStore';
 import '../App.css';
 
 /* Order step config */
@@ -28,9 +28,7 @@ export default function OrderTracking() {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
 
-    const [order, setOrder] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const { currentOrder: order, loading, error, getOrderDetails } = useOrderStore();
 
     /* Auth + Fetch order */
     useEffect(() => {
@@ -39,29 +37,10 @@ export default function OrderTracking() {
             return;
         }
 
-        fetchOrder();
-    }, [orderId]);
-
-    /* Fetch order by ID */
-    const fetchOrder = async () => {
-        try {
-            setLoading(true);
-            setError('');
-
-            const res = await api.get(`/orders/${orderId}`);
-
-            if (res.data.success) {
-                setOrder(res.data.data);
-            } else {
-                setError(res.data.message || 'Failed to fetch order');
-            }
-        } catch (err) {
-            console.error('Order fetch error:', err);
-            setError(err.response?.data?.message || 'Failed to fetch order');
-        } finally {
-            setLoading(false);
+        if (orderId) {
+            getOrderDetails(orderId);
         }
-    };
+    }, [orderId, isAuthenticated, navigate, getOrderDetails]);
 
     /* UI States */
     if (loading) {
@@ -225,7 +204,7 @@ export default function OrderTracking() {
                                                 {!isLast && (
                                                     <div
                                                         className={`absolute top-10 left-5 w-1 h-full rounded-full z-0 transition-colors duration-500
-                            ${isCompleted ? 'bg-gradient-to-b from-green-500 to-green-600' : 'bg-gray-100'}`}
+                            ${isCompleted ? 'bg-linear-to-b from-green-500 to-green-600' : 'bg-gray-100'}`}
                                                     />
                                                 )}
 
@@ -234,9 +213,9 @@ export default function OrderTracking() {
                                                     className={`relative z-10 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-500 shrink-0
                           ${
                               isCompleted
-                                  ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-100 scale-110'
+                                  ? 'bg-linear-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-100 scale-110'
                                   : isActive
-                                    ? 'bg-gradient-to-br from-green-600 to-emerald-800 text-white shadow-[0_0_0_8px_rgba(16,185,129,0.1),0_12px_24px_rgba(16,185,129,0.4)] scale-125 animate-pulse'
+                                    ? 'bg-linear-to-br from-green-600 to-emerald-800 text-white shadow-[0_0_0_8px_rgba(16,185,129,0.1),0_12px_24px_rgba(16,185,129,0.4)] scale-125 animate-pulse'
                                     : 'bg-gray-100 text-gray-400'
                           }`}
                                                 >

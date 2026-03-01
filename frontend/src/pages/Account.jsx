@@ -16,13 +16,24 @@ import {
     Home,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import api from '../../utils/api';
+import useUserStore from '../store/useUserStore';
+import useOrderStore from '../store/useOrderStore';
 
 export default function Account() {
     const navigate = useNavigate();
-    const { user: authUser, isAuthenticated, logout } = useAuth();
-    const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { isAuthenticated, logout } = useAuth();
+
+    const {
+        userProfile,
+        loading: loadingProfile,
+        error: profileError,
+        getProfile,
+        updateProfile,
+        clearUser,
+    } = useUserStore();
+
+    const { orders, loading: loadingOrders, getOrders } = useOrderStore();
+
     const [editing, setEditing] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -30,53 +41,27 @@ export default function Account() {
         contact_number: '',
         address: '',
     });
-    const [orders, setOrders] = useState([]);
-    const [loadingOrders, setLoadingOrders] = useState(false);
-    const [error, setError] = useState('');
+    const [pageError, setPageError] = useState('');
 
     useEffect(() => {
         if (!isAuthenticated()) {
             navigate('/home');
             return;
         }
-        fetchUserProfile();
-        fetchOrderHistory();
-    }, [isAuthenticated, navigate]);
+        getProfile();
+        getOrders();
+    }, [isAuthenticated, navigate, getProfile, getOrders]);
 
-    const fetchUserProfile = async () => {
-        try {
-            setLoading(true);
-            const response = await api.get('/user/profile');
-            if (response.data.success) {
-                setUserData(response.data.data);
-                setFormData({
-                    username: response.data.data.username || '',
-                    email: response.data.data.email || '',
-                    contact_number: response.data.data.contact_number || '',
-                    address: response.data.data.address || '',
-                });
-            }
-        } catch (err) {
-            console.error('Error fetching profile:', err);
-            setError(err.response?.data?.message || 'Failed to fetch profile');
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        if (userProfile) {
+            setFormData({
+                username: userProfile.username || '',
+                email: userProfile.email || '',
+                contact_number: userProfile.contact_number || '',
+                address: userProfile.address || '',
+            });
         }
-    };
-
-    const fetchOrderHistory = async () => {
-        try {
-            setLoadingOrders(true);
-            const response = await api.get('/orders/history');
-            if (response.data.success) {
-                setOrders(response.data.data || []);
-            }
-        } catch (err) {
-            console.error('Error fetching orders:', err);
-        } finally {
-            setLoadingOrders(false);
-        }
-    };
+    }, [userProfile]);
 
     const handleInputChange = (e) => {
         setFormData({
@@ -86,36 +71,31 @@ export default function Account() {
     };
 
     const handleSave = async () => {
-        try {
-            setError('');
-            const response = await api.put('/user/profile', formData);
-            if (response.data.success) {
-                setUserData(response.data.data);
-                setEditing(false);
-                // Update auth context
-                if (window.location.reload) {
-                    // Optionally reload to refresh auth context
-                }
-            }
-        } catch (err) {
-            console.error('Error updating profile:', err);
-            setError(err.response?.data?.message || 'Failed to update profile');
+        setPageError('');
+        const res = await updateProfile(formData);
+        if (res.success) {
+            setEditing(false);
+        } else {
+            setPageError(res.message);
         }
     };
 
     const handleCancel = () => {
-        setFormData({
-            username: userData?.username || '',
-            email: userData?.email || '',
-            contact_number: userData?.contact_number || '',
-            address: userData?.address || '',
-        });
+        if (userProfile) {
+            setFormData({
+                username: userProfile.username || '',
+                email: userProfile.email || '',
+                contact_number: userProfile.contact_number || '',
+                address: userProfile.address || '',
+            });
+        }
         setEditing(false);
-        setError('');
+        setPageError('');
     };
 
     const handleLogout = () => {
         logout();
+        clearUser();
         navigate('/home');
     };
 
@@ -130,13 +110,15 @@ export default function Account() {
         });
     };
 
-    if (loading) {
+    if (loadingProfile && !userProfile) {
         return (
             <>
                 <div className="min-h-screen bg-gray-50 flex items-center justify-center font-sans">
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-green-100 border-t-green-600 rounded-full animate-spin"></div>
-                        <p className="text-gray-500 font-medium">Loading account information...</p>
+                        <p className="text-gray-500 font-medium font-sans">
+                            Loading account information...
+                        </p>
                     </div>
                 </div>
             </>
@@ -164,9 +146,9 @@ export default function Account() {
                         Account Settings
                     </h1>
 
-                    {error && (
+                    {(profileError || pageError) && (
                         <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 text-sm font-medium">
-                            {error}
+                            {profileError || pageError}
                         </div>
                     )}
 
@@ -210,20 +192,20 @@ export default function Account() {
                                     label: 'Username',
                                     name: 'username',
                                     icon: <User size={18} />,
-                                    value: userData?.username,
+                                    value: userProfile?.username,
                                 },
                                 {
                                     label: 'Email',
                                     name: 'email',
                                     icon: <Mail size={18} />,
-                                    value: userData?.email,
+                                    value: userProfile?.email,
                                     type: 'email',
                                 },
                                 {
                                     label: 'Contact Number',
                                     name: 'contact_number',
                                     icon: <Phone size={18} />,
-                                    value: userData?.contact_number,
+                                    value: userProfile?.contact_number,
                                     type: 'tel',
                                 },
                             ].map((field) => (
@@ -265,7 +247,7 @@ export default function Account() {
                                     />
                                 ) : (
                                     <p className="text-base text-gray-900 font-bold m-0 pl-1 leading-relaxed">
-                                        {userData?.address || 'No address set'}
+                                        {userProfile?.address || 'No address set'}
                                     </p>
                                 )}
                             </div>

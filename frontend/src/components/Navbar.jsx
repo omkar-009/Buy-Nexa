@@ -4,7 +4,8 @@ import { ShoppingCart, Search, UserCircle, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import Login from '../components/Login';
-import api from '../../utils/api';
+import useUserStore from '../store/useUserStore';
+import useProductStore from '../store/useProductStore';
 import '../App.css';
 
 import logo from '../assets/bnLogo.png';
@@ -13,78 +14,43 @@ export default function Navbar() {
     const navigate = useNavigate();
     const [showLogin, setShowLogin] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
-    const [loadingSearch, setLoadingSearch] = useState(false);
     const searchRef = useRef(null);
     const resultsRef = useRef(null);
     const { getTotalItems, getTotalPrice } = useCart();
     const { user, isAuthenticated } = useAuth();
     const cartItemCount = getTotalItems();
     const cartTotalPrice = getTotalPrice();
-    const [userData, setUserData] = useState(null);
-    const [loadingUser, setLoadingUser] = useState(false);
+    const { userProfile: userData, getProfile } = useUserStore();
+    const {
+        searchResults,
+        searchLoading: loadingSearch,
+        searchProducts,
+        clearSearch: clearStoreSearch,
+    } = useProductStore();
 
-    // fetch user address
+    // fetch user profile
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                setLoadingUser(true);
-                const response = await api.get('/user/profile');
-                if (response.data.success) {
-                    setUserData(response.data.data);
-                }
-            } catch (error) {
-                setUserData({
-                    username: 'Guest',
-                    email: '',
-                    contact_number: '',
-                    address: 'India',
-                });
-            } finally {
-                setLoadingUser(false);
-            }
-        };
-
-        fetchUserData();
-    }, []);
+        if (isAuthenticated()) {
+            getProfile();
+        }
+    }, [isAuthenticated, getProfile]);
 
     // Real-time search as user types
     useEffect(() => {
-        const searchProducts = async () => {
-            if (searchQuery.trim().length < 2) {
-                setSearchResults([]);
-                setShowResults(false);
-                return;
-            }
-
-            setLoadingSearch(true);
-            try {
-                const response = await api.get(
-                    `/products/search?query=${encodeURIComponent(searchQuery.trim())}`
-                );
-                if (response.data.success) {
-                    setSearchResults(response.data.data || []);
-                    setShowResults(true);
-                } else {
-                    setSearchResults([]);
-                    setShowResults(false);
-                }
-            } catch (error) {
-                console.error('Error searching products:', error);
-                setSearchResults([]);
-                setShowResults(false);
-            } finally {
-                setLoadingSearch(false);
-            }
-        };
+        if (searchQuery.trim().length < 2) {
+            clearStoreSearch();
+            setShowResults(false);
+            return;
+        }
 
         const debounceTimer = setTimeout(() => {
-            searchProducts();
-        }, 300); // Debounce search by 300ms
+            searchProducts(searchQuery.trim());
+            setShowResults(true);
+        }, 300);
 
         return () => clearTimeout(debounceTimer);
-    }, [searchQuery]);
+    }, [searchQuery, searchProducts, clearStoreSearch]);
 
     // Close search results when clicking outside
     useEffect(() => {
@@ -126,7 +92,7 @@ export default function Navbar() {
 
     const clearSearch = () => {
         setSearchQuery('');
-        setSearchResults([]);
+        clearStoreSearch();
         setShowResults(false);
     };
 
@@ -221,7 +187,7 @@ export default function Navbar() {
                                                         handleSearchResultClick(product.id)
                                                     }
                                                 >
-                                                    <div className="w-12 h-12 rounded-lg border border-gray-100 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center p-1">
+                                                    <div className="w-12 h-12 rounded-lg border border-gray-100 overflow-hidden bg-white shrink-0 flex items-center justify-center p-1">
                                                         <img
                                                             src={
                                                                 product.imageUrls &&

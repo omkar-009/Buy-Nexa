@@ -14,14 +14,14 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import CancelOrderModal from '../components/CancelOrderModal';
-import api from '../../utils/api';
+import useOrderStore from '../store/useOrderStore';
 
 export default function OrderHistory() {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+
+    const { orders, loading, error, getOrders, cancelOrder } = useOrderStore();
+
     const [cancelOrderId, setCancelOrderId] = useState(null);
     const [cancelOrderData, setCancelOrderData] = useState(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
@@ -36,26 +36,8 @@ export default function OrderHistory() {
             navigate('/home');
             return;
         }
-        fetchOrderHistory();
-    }, [isAuthenticated, navigate]);
-
-    const fetchOrderHistory = async () => {
-        try {
-            setLoading(true);
-            setError('');
-            const response = await api.get('/orders/history');
-            if (response.data.success) {
-                setOrders(response.data.data || []);
-            } else {
-                setError(response.data.message || 'Failed to fetch order history');
-            }
-        } catch (err) {
-            console.error('Error fetching order history:', err);
-            setError(err.response?.data?.message || 'Failed to fetch order history');
-        } finally {
-            setLoading(false);
-        }
-    };
+        getOrders();
+    }, [isAuthenticated, navigate, getOrders]);
 
     const handleCancelClick = (order) => {
         setCancelOrderId(order.order_id);
@@ -66,17 +48,12 @@ export default function OrderHistory() {
     const handleCancelConfirm = async () => {
         if (!cancelOrderId) return;
 
-        try {
-            const response = await api.put(`/orders/${cancelOrderId}/cancel`);
-            if (response.data.success) {
-                // Refresh order history
-                await fetchOrderHistory();
-                setShowCancelModal(false);
-                setCancelOrderId(null);
-            }
-        } catch (err) {
-            console.error('Error cancelling order:', err);
-            alert(err.response?.data?.message || 'Failed to cancel order');
+        const res = await cancelOrder(cancelOrderId);
+        if (res.success) {
+            setShowCancelModal(false);
+            setCancelOrderId(null);
+        } else {
+            alert(res.message);
         }
     };
 
