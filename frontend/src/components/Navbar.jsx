@@ -137,7 +137,7 @@ export default function Navbar() {
                 <nav className="max-w-[1280px] mx-auto px-6 py-2.5 flex items-center justify-between gap-4">
                     {/* Logo Section */}
                     <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-                        <img src={logo} alt="Buy Nexa" className="w-[110px] mr-5" />
+                        <img src={logo} alt="Buy Nexa" className="w-[150px] mr-5" />
                     </div>
 
                     {/* Search Bar */}

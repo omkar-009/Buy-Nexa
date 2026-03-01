@@ -13,8 +13,9 @@ import {
     Star,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import CartNotification from './CartNotification';
 import api from '../../utils/api';
+import ProductCard from './ProductCard';
+import CartNotification from './CartNotification';
 
 export default function ProductDescription() {
     const { id } = useParams();
@@ -710,110 +711,22 @@ export default function ProductDescription() {
                                             scrollBehavior: 'smooth',
                                         }}
                                     >
-                                        {similarProducts.map((item) => (
-                                            <div
-                                                key={item.id}
-                                                className="group/card min-w-[170px] max-w-[170px] bg-white border border-gray-100 rounded-xl p-3 flex flex-col gap-2 transition-all duration-300 hover:shadow-lg hover:border-green-100 cursor-pointer"
-                                                onClick={() => navigate(`/product/${item.id}`)}
-                                            >
-                                                <div className="w-full h-[140px] overflow-hidden rounded-lg bg-gray-50 mb-1">
-                                                    {item.imageUrls && item.imageUrls[0] ? (
-                                                        <img
-                                                            src={item.imageUrls[0]}
-                                                            alt={item.name}
-                                                            className="w-full h-full object-contain transition-transform duration-300 group-hover/card:scale-105"
-                                                            onError={(e) => {
-                                                                e.target.style.display = 'none';
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center p-2">
-                                                            No Image
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <p className="text-sm font-semibold text-gray-800 m-0 line-clamp-2 min-h-[40px] leading-tight">
-                                                    {item.name}
-                                                </p>
-                                                <div className="flex flex-col gap-1.5">
-                                                    <p className="text-[12px] text-gray-500 m-0">
-                                                        {item.quantity}
-                                                    </p>
-
-                                                    <div className="flex items-center gap-1 mt-0.5">
-                                                        <Star
-                                                            size={14}
-                                                            fill="#22c55e"
-                                                            stroke="#22c55e"
-                                                        />
-                                                        <span className="ml-1 text-[13px] font-medium text-gray-700">
-                                                            {(Number(item.rating) || 0).toFixed(1)}
-                                                        </span>
-
-                                                        <span className="ml-1 text-[13px] text-gray-500">
-                                                            ({Number(item.rating_count) || 0})
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex justify-between items-center mt-auto">
-                                                    <p className="text-sm font-bold text-gray-900 m-0">
-                                                        ₹{item.price}
-                                                    </p>
-                                                    {(() => {
-                                                        const cartItem = cartItems.find(
-                                                            (c) => c.id === item.id
-                                                        );
-                                                        const qty = cartItem?.cartQuantity || 0;
-
-                                                        if (qty > 0) {
-                                                            return (
-                                                                <div className="flex items-center gap-2 bg-green-50 rounded-md p-0.5">
-                                                                    <button
-                                                                        className="w-7 h-7 flex items-center justify-center border-none bg-none text-green-600 cursor-pointer rounded-sm hover:bg-green-100 transition-colors"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            decreaseQuantity(
-                                                                                item.id
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        <Minus size={16} />
-                                                                    </button>
-
-                                                                    <span className="text-sm font-bold text-green-600 min-w-[14px] text-center">
-                                                                        {qty}
-                                                                    </span>
-
-                                                                    <button
-                                                                        className="w-7 h-7 flex items-center justify-center border-none bg-none text-green-600 cursor-pointer rounded-sm hover:bg-green-100 transition-colors"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            increaseQuantity(
-                                                                                item.id
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        <Plus size={16} />
-                                                                    </button>
-                                                                </div>
-                                                            );
-                                                        }
-
-                                                        return (
-                                                            <button
-                                                                className="bg-white text-green-600 border border-green-600 py-1.5 px-4 rounded-md font-bold text-sm cursor-pointer transition-all duration-200 hover:bg-green-600 hover:text-white sm:px-3 sm:py-1"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    addToCart(item);
-                                                                }}
-                                                            >
-                                                                ADD
-                                                            </button>
-                                                        );
-                                                    })()}
-                                                </div>
-                                            </div>
-                                        ))}
+                                        {similarProducts.map((item) => {
+                                            const cartItem = cartItems.find(
+                                                (c) => c.id === item.id
+                                            );
+                                            return (
+                                                <ProductCard
+                                                    key={item.id}
+                                                    product={item}
+                                                    onAddToCart={addToCart}
+                                                    onIncrease={increaseQuantity}
+                                                    onDecrease={decreaseQuantity}
+                                                    cartQuantity={cartItem?.cartQuantity || 0}
+                                                    onClick={() => navigate(`/product/${item.id}`)}
+                                                />
+                                            );
+                                        })}
                                     </div>
 
                                     {/* Right Arrow */}

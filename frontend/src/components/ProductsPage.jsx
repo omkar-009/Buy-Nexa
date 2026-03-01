@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Star, Minus, Plus, Package } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import api from '../../utils/api';
+import ProductCard from './ProductCard';
 
 export default function ProductsPage() {
     const { category } = useParams();
@@ -86,106 +87,19 @@ export default function ProductsPage() {
                                 </button>
                             </div>
                         ) : products.length > 0 ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 sm:gap-4">
+                            <div className="flex flex-wrap gap-6 sm:gap-4 justify-start">
                                 {products.map((item) => {
                                     const cartItem = cartItems.find((c) => c.id === item.id);
-                                    const quantity = cartItem?.cartQuantity || 0;
-
                                     return (
-                                        <div
+                                        <ProductCard
                                             key={item.id}
+                                            product={item}
+                                            onAddToCart={addToCart}
+                                            onIncrease={increaseQuantity}
+                                            onDecrease={decreaseQuantity}
+                                            cartQuantity={cartItem?.cartQuantity || 0}
                                             onClick={() => navigate(`/product/${item.id}`)}
-                                            className="group bg-white rounded-2xl p-4 border border-gray-100 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-green-50/50 hover:-translate-y-1 cursor-pointer flex flex-col h-full"
-                                        >
-                                            <div className="aspect-square w-full bg-gray-50 rounded-xl overflow-hidden mb-4 p-4 flex items-center justify-center relative group-hover:bg-white transition-colors">
-                                                <img
-                                                    src={item.imageUrls?.[0] || '/placeholder.png'}
-                                                    alt={item.name}
-                                                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                                                    onError={(e) => {
-                                                        e.target.src = '/placeholder.png';
-                                                    }}
-                                                />
-                                                {item.discount > 0 && (
-                                                    <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter">
-                                                        {item.discount}% OFF
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="flex flex-col gap-1.5 flex-1">
-                                                <h3 className="text-sm font-bold text-gray-800 m-0 line-clamp-2 leading-snug h-10 group-hover:text-green-600 transition-colors">
-                                                    {item.name}
-                                                </h3>
-
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest m-0">
-                                                        {item.quantity}
-                                                    </p>
-                                                    <div className="flex items-center gap-1 bg-green-50 px-1.5 py-0.5 rounded-md">
-                                                        <Star
-                                                            size={10}
-                                                            fill="#22c55e"
-                                                            stroke="#22c55e"
-                                                        />
-                                                        <span className="text-[10px] font-black text-green-700">
-                                                            {(Number(item.rating) || 0).toFixed(1)}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-auto pt-3 flex items-center justify-between border-t border-gray-50">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-base font-black text-gray-900 tracking-tight">
-                                                            ₹{item.price}
-                                                        </span>
-                                                        {item.mrp > item.price && (
-                                                            <span className="text-[10px] text-gray-400 line-through">
-                                                                ₹{item.mrp}
-                                                            </span>
-                                                        )}
-                                                    </div>
-
-                                                    {quantity > 0 ? (
-                                                        <div className="flex items-center bg-green-600 rounded-xl overflow-hidden shadow-lg shadow-green-100">
-                                                            <button
-                                                                className="w-8 h-8 flex items-center justify-center text-white border-none bg-transparent hover:bg-black/10 transition-colors"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    decreaseQuantity(item.id);
-                                                                }}
-                                                            >
-                                                                <Minus size={14} />
-                                                            </button>
-                                                            <span className="text-xs font-black text-white w-6 text-center">
-                                                                {quantity}
-                                                            </span>
-                                                            <button
-                                                                className="w-8 h-8 flex items-center justify-center text-white border-none bg-transparent hover:bg-black/10 transition-colors"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    increaseQuantity(item.id);
-                                                                }}
-                                                            >
-                                                                <Plus size={14} />
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        <button
-                                                            className="w-10 h-10 bg-green-50 text-green-600 rounded-xl flex items-center justify-center transition-all hover:bg-green-600 hover:text-white active:scale-90"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                addToCart(item);
-                                                            }}
-                                                        >
-                                                            <span className="text-xs font-black">
-                                                                ADD
-                                                            </span>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
+                                        />
                                     );
                                 })}
                             </div>
