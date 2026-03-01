@@ -136,8 +136,12 @@ export default function Navbar() {
             <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
                 <nav className="max-w-[1280px] mx-auto px-6 py-2.5 flex items-center justify-between gap-4">
                     {/* Logo Section */}
-                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-                        <img src={logo} alt="Buy Nexa" className="w-[150px] mr-5" />
+                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start overflow-hidden">
+                        <img
+                            src={logo}
+                            alt="Buy Nexa"
+                            className="w-[160px] md:w-[180px] mr-5 transition-transform duration-500 hover:scale-135 scale-125 origin-left"
+                        />
                     </div>
 
                     {/* Search Bar */}
