@@ -10,8 +10,10 @@ export default function Footer() {
         <footer className="bg-green-900 border-t border-green-800 mt-10 px-6 py-10 text-white">
             <div className="max-w-[1280px] mx-auto flex gap-10 lg:gap-[60px] mb-10 flex-col lg:flex-row">
                 {/* Useful Links Section */}
-                <div className="flex-1">
-                    <h4 className="text-base font-semibold text-white mb-4">Useful Links</h4>
+                <div className="flex-1 min-w-[200px]">
+                    <h4 className="text-lg font-bold text-white mb-6 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-10 after:h-0.5 after:bg-green-500">
+                        Useful Links
+                    </h4>
                     <div className="flex flex-col gap-2">
                         {['Blog', 'Privacy', 'Terms', 'FAQs', 'Contact'].map((link) => (
                             <a
@@ -26,9 +28,11 @@ export default function Footer() {
                 </div>
 
                 {/* Categories Section */}
-                <div className="flex-[2]">
-                    <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-base font-semibold text-white m-0">Categories</h4>
+                <div className="flex-[2] min-w-[300px]">
+                    <div className="flex justify-between items-center mb-6">
+                        <h4 className="text-lg font-bold text-white m-0 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-10 after:h-0.5 after:bg-green-500">
+                            Categories
+                        </h4>
                         <a
                             href="/categories"
                             className="text-green-400 no-underline text-sm font-medium hover:underline"
@@ -54,8 +58,10 @@ export default function Footer() {
                 </div>
 
                 {/* Brand & Mission */}
-                <div className="flex-1">
-                    <h4 className="text-base font-semibold text-white mb-4">Our Mission</h4>
+                <div className="flex-1 min-w-[200px]">
+                    <h4 className="text-lg font-bold text-white mb-6 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-10 after:h-0.5 after:bg-green-500">
+                        Our Mission
+                    </h4>
                     <p className="text-gray-300 text-sm m-0 leading-relaxed">
                         Revolutionizing grocery delivery with speed and quality. Bringing the
                         freshest produce directly to your doorstep.
@@ -68,7 +74,8 @@ export default function Footer() {
                 <div className="flex justify-between items-center mb-6 flex-wrap gap-5">
                     {/* Copyright */}
                     <div className="text-gray-300 text-sm m-0">
-                        © {new Date().getFullYear()} Copyright: <span className="italic text-xs">BuyNexa Groceries</span>
+                        © {new Date().getFullYear()} Copyright:{' '}
+                        <span className="italic text-xs">BuyNexa Groceries</span>
                     </div>
 
                     {/* App Download & Social Media */}
@@ -128,7 +135,7 @@ export default function Footer() {
                         </div>
 
                         {/* Social Media Icons */}
-                        <div className="flex gap-3 w-full sm:w-auto sm:justify-start justify-center">
+                        <div className="flex gap-4 w-full sm:w-auto sm:justify-start justify-center">
                             {[
                                 {
                                     icon: Facebook,
@@ -154,20 +161,20 @@ export default function Footer() {
                                 <a
                                     key={social.label}
                                     href={social.href}
-                                    className="w-9 h-9 rounded-full bg-gray-800 text-white flex items-center justify-center no-underline transition-colors duration-200 hover:bg-green-600"
+                                    className="w-10 h-10 rounded-full bg-white text-green-900 flex items-center justify-center no-underline transition-all duration-300 hover:bg-green-500 hover:text-white hover:scale-110 shadow-sm"
                                     aria-label={social.label}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    <social.icon size={18} />
+                                    <social.icon size={20} />
                                 </a>
                             ))}
                             <button
                                 onClick={openMail}
-                                className="w-9 h-9 rounded-full bg-gray-800 text-white flex items-center justify-center no-underline transition-colors duration-200 hover:bg-green-600"
+                                className="w-10 h-10 rounded-full bg-white text-green-900 flex items-center justify-center no-underline transition-all duration-300 hover:bg-green-500 hover:text-white hover:scale-110 shadow-sm border-0 cursor-pointer"
                                 aria-label="Email Us"
                             >
-                                <Mail size={18} />
+                                <Mail size={20} />
                             </button>
                         </div>
                     </div>
