@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS tokens (
     user_id INT NOT NULL,
     username VARCHAR(50) NOT NULL,
     access_token VARCHAR(500),
+    refresh_token VARCHAR(500),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

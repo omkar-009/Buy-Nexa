@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import { Plus, Minus, Trash2, ShoppingBag, Clock } from 'lucide-react';
+import useCartStore from '../store/useCartStore';
 import { useAuth } from '../context/AuthContext';
 import OrderModal from '../components/OrderModal';
 import Login from '../components/Login';
@@ -18,7 +18,7 @@ export default function Cart() {
         getTotalItems,
         getTotalPrice,
         clearCart,
-    } = useCart();
+    } = useCartStore();
     const [showLogin, setShowLogin] = useState(false);
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [userData, setUserData] = useState(null);
@@ -68,14 +68,6 @@ export default function Cart() {
     const handlePlaceOrder = async () => {
         // Check if user is authenticated
         if (!isAuthenticated()) {
-            // Save cart to localStorage before redirecting
-            try {
-                localStorage.setItem('vcoop_cart', JSON.stringify(cartItems));
-                localStorage.setItem('vcoop_redirect_to', 'cart');
-                console.log('Cart saved before login redirect');
-            } catch (error) {
-                console.error('Error saving cart:', error);
-            }
             // Show login modal
             setShowLogin(true);
             return;
@@ -140,11 +132,9 @@ export default function Cart() {
         }
     };
 
-    // Handle login success - restore cart if needed
+    // Handle login success
     useEffect(() => {
-        if (isAuthenticated() && localStorage.getItem('vcoop_redirect_to') === 'cart') {
-            // User logged in, cart is already in localStorage from CartContext
-            localStorage.removeItem('vcoop_redirect_to');
+        if (isAuthenticated()) {
             setShowLogin(false);
         }
     }, [isAuthenticated]);

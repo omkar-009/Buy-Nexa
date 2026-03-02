@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, XCircle } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import useCartStore from '../store/useCartStore';
 import CartNotification from '../components/CartNotification';
 import useProductStore from '../store/useProductStore';
 import ProductCard from '../components/ProductCard';
@@ -18,7 +18,7 @@ export default function SearchResults() {
         cartItems,
         notification,
         hideNotification,
-    } = useCart();
+    } = useCartStore();
     const {
         searchResults: products,
         searchLoading: loading,

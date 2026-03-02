@@ -6,7 +6,6 @@ const handleLogin = async (req, res, next) => {
     try {
         let { contact_no, email, identifier, password } = req.body;
 
-        // Allow login via single identifier
         if (identifier) {
             identifier.includes('@') ? (email = identifier) : (contact_no = identifier);
         }
@@ -18,7 +17,6 @@ const handleLogin = async (req, res, next) => {
             });
         }
 
-        // Find user
         const query = contact_no
             ? 'SELECT * FROM users WHERE contact_number = ?'
             : 'SELECT * FROM users WHERE email = ?';
@@ -34,7 +32,6 @@ const handleLogin = async (req, res, next) => {
 
         const user = rows[0];
 
-        // Verify password
         const isValid = await bcrypt.compare(password, user.password_hash);
         if (!isValid) {
             return res.status(401).json({
@@ -43,38 +40,50 @@ const handleLogin = async (req, res, next) => {
             });
         }
 
-        // JWT payload
         const payload = {
             user_id: user.user_id,
             username: user.username,
             email: user.email,
         };
 
-        // Create token
+        // Create tokens
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: '1d',
+            expiresIn: '15m',
         });
 
-        // Remove old tokens (single-device login)
-        await pool.query('DELETE FROM tokens WHERE user_id = ?', [user.user_id]);
-
-        // Store token in DB
-        await pool.query(
-            'INSERT INTO tokens (user_id, username, access_token, created_at) VALUES (?, ?, ?, NOW())',
-            [user.user_id, user.username, accessToken]
+        const refreshToken = jwt.sign(
+            payload,
+            process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+            {
+                expiresIn: '15d',
+            }
         );
 
-        // Set HTTP-only cookie
-        res.cookie('Authorization', accessToken, {
+        // Set Cookies
+        const cookieOptions = {
             httpOnly: true,
-            secure: true,
+            secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: 24 * 60 * 60 * 1000, // 1 day
+        };
+
+        res.cookie('access_token', accessToken, {
+            ...cookieOptions,
+            maxAge: 15 * 60 * 1000,
+        });
+
+        res.cookie('refresh_token', refreshToken, {
+            ...cookieOptions,
+            maxAge: 15 * 24 * 60 * 60 * 1000,
         });
 
         return res.status(200).json({
             success: true,
             message: 'Login successful',
+            user: {
+                user_id: user.user_id,
+                username: user.username,
+                email: user.email,
+            },
         });
     } catch (error) {
         console.error('Login error:', error);

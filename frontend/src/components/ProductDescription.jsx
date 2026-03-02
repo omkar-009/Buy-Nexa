@@ -12,7 +12,7 @@ import {
     Minus,
     Star,
 } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import useCartStore from '../store/useCartStore';
 import useProductStore from '../store/useProductStore';
 import ProductCard from './ProductCard';
 import CartNotification from './CartNotification';
@@ -27,7 +27,7 @@ export default function ProductDescription() {
         cartItems,
         notification,
         hideNotification,
-    } = useCart();
+    } = useCartStore();
     const {
         currentProduct: product,
         loading,

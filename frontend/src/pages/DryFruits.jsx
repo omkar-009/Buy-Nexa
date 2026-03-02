@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Minus, Plus, Star } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import useCartStore from '../store/useCartStore';
 import CartNotification from '../components/CartNotification';
 import api from '../../utils/api';
 import ProductCard from '../components/ProductCard';
@@ -16,7 +16,7 @@ export default function DryFruits() {
         cartItems,
         notification,
         hideNotification,
-    } = useCart();
+    } = useCartStore();
     const [products, setProducts] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);

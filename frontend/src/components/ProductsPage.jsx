@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Star, Minus, Plus, Package } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import useCartStore from '../store/useCartStore';
 import api from '../../utils/api';
 import ProductCard from './ProductCard';
 
 export default function ProductsPage() {
     const { category } = useParams();
     const navigate = useNavigate();
-    const { addToCart, cartItems, increaseQuantity, decreaseQuantity } = useCart();
+    const { addToCart, cartItems, increaseQuantity, decreaseQuantity } = useCartStore();
 
     const [products, setProducts] = useState([]);
     const [error, setError] = useState('');

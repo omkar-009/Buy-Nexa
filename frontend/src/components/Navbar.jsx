@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search, UserCircle, X } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import useCartStore from '../store/useCartStore';
 import { useAuth } from '../context/AuthContext';
 import Login from '../components/Login';
 import useUserStore from '../store/useUserStore';
@@ -17,7 +17,7 @@ export default function Navbar() {
     const [showResults, setShowResults] = useState(false);
     const searchRef = useRef(null);
     const resultsRef = useRef(null);
-    const { getTotalItems, getTotalPrice } = useCart();
+    const { getTotalItems, getTotalPrice } = useCartStore();
     const { user, isAuthenticated } = useAuth();
     const cartItemCount = getTotalItems();
     const cartTotalPrice = getTotalPrice();

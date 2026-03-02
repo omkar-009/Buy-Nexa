@@ -176,35 +176,8 @@ const updateUserProfile = async (req, res, next) => {
     }
 };
 
-const logoutUser = async (req, res) => {
-    try {
-        const token = req.cookies?.Authorization;
-
-        if (token) {
-            await pool.query('DELETE FROM tokens WHERE access_token = ?', [token]);
-        }
-
-        res.clearCookie('Authorization', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        });
-
-        return res.json({
-            success: true,
-            message: 'Logged out successfully',
-        });
-    } catch (err) {
-        return res.status(500).json({
-            success: false,
-            message: 'Logout failed',
-        });
-    }
-};
-
 module.exports = {
     registerUser,
     getCurrentUser,
     updateUserProfile,
-    logoutUser,
 };

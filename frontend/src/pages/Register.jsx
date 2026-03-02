@@ -181,7 +181,7 @@ export default function Register() {
                                 Creating Account...
                             </span>
                         ) : (
-                            'Join Vcoop'
+                            'Join Now'
                         )}
                     </button>
                 </form>

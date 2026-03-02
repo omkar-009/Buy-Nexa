@@ -1,30 +1,27 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const handleLogin = require("../middleware/handleLogin");
-const Authorization = require("../middleware/authorization");
-const { registerUser, getCurrentUser, updateUserProfile, logoutUser } = require("../controllers/user.controller")
+const handleLogin = require('../middleware/handleLogin');
+const Authorization = require('../middleware/authorization');
+const {
+    registerUser,
+    getCurrentUser,
+    updateUserProfile,
+} = require('../controllers/user.controller');
+const { refreshToken, logout } = require('../controllers/auth.controller');
 
-// Register a new user
-router.post( "/register", registerUser);
+// Public routes
+router.post('/register', registerUser);
+router.post('/login', handleLogin);
+router.post('/refresh-token', refreshToken);
 
-// Login route
-router.post( "/login", handleLogin);
+// Protected routes
+router.get('/profile', Authorization, getCurrentUser);
+router.put('/profile', Authorization, updateUserProfile);
+router.post('/logout', Authorization, logout);
 
-// Test route to verify routing works (no middleware)
-router.get("/test", (req, res) => {
-  console.log("Test route hit!");
-  res.json({ message: "User routes are working" });
+// Test route
+router.get('/test', (req, res) => {
+    res.json({ message: 'User routes are working' });
 });
-
-// Get current user profile (protected route)
-router.get("/profile", async (req, res, next) => {
-  next();
-}, Authorization, getCurrentUser);
-
-// Update user profile (protected route)
-router.put("/profile", Authorization, updateUserProfile);
-
-// Logout 
-router.post("/logout", Authorization, logoutUser);
 
 module.exports = router;
