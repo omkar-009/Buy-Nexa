@@ -85,27 +85,27 @@ const createOrder = async (req, res, next) => {
             // Fetch complete order with items
             const [orderRows] = await pool.query(
                 `SELECT 
-      o.*,
-      CONCAT(
-        '[', 
-        GROUP_CONCAT(
-          JSON_OBJECT(
-            'item_id', oi.item_id,
-            'product_id', oi.product_id,
-            'product_name', oi.product_name,
-            'product_quantity', oi.product_quantity,
-            'product_price', oi.product_price,
-            'cart_quantity', oi.cart_quantity,
-            'item_total', oi.item_total,
-            'product_images', oi.product_images
-          )
-        ),
-        ']'
-      ) AS items
-    FROM orders o
-    LEFT JOIN order_items oi ON o.order_id = oi.order_id
-    WHERE o.order_id = ?
-    GROUP BY o.order_id`,
+                    o.*,
+                    CONCAT(
+                        '[', 
+                        GROUP_CONCAT(
+                        JSON_OBJECT(
+                            'item_id', oi.item_id,
+                            'product_id', oi.product_id,
+                            'product_name', oi.product_name,
+                            'product_quantity', oi.product_quantity,
+                            'product_price', oi.product_price,
+                            'cart_quantity', oi.cart_quantity,
+                            'item_total', oi.item_total,
+                            'product_images', oi.product_images
+                        )
+                        ),
+                        ']'
+                    ) AS items
+                    FROM orders o
+                    LEFT JOIN order_items oi ON o.order_id = oi.order_id
+                    WHERE o.order_id = ?
+                    GROUP BY o.order_id`,
                 [orderId]
             );
 
