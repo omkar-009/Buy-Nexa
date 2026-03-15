@@ -12,6 +12,7 @@ import {
     Minus,
     Star,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import useCartStore from '../store/useCartStore';
 import useProductStore from '../store/useProductStore';
 import ProductCard from './ProductCard';
@@ -70,13 +71,23 @@ export default function ProductDescription() {
 
     const submitRating = async (value) => {
         setSubmittingRating(true);
-        const res = await storeSubmitRating(id, value);
-        if (res.success) {
-            setUserRating(value);
-        } else {
-            alert(res.message);
+        try {
+            const res = await storeSubmitRating(id, value);
+            if (res.success) {
+                setUserRating(value);
+                toast.success('Thank you for your rating!');
+            } else {
+                toast.error(res.message || 'Failed to submit rating');
+            }
+        } catch (err) {
+            if (err.response?.status === 401) {
+                toast.error('Please login to rate this product');
+            } else {
+                toast.error('Something went wrong. Please try again later.');
+            }
+        } finally {
+            setSubmittingRating(false);
         }
-        setSubmittingRating(false);
     };
 
     // Scroll functions for similar products

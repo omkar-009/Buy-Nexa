@@ -140,22 +140,22 @@ export default function Footer() {
                                 {
                                     icon: Facebook,
                                     label: 'Facebook',
-                                    href: 'https://www.facebook.com/people/Venkateshwara-Power-Agro/61556318762544/',
+                                    href: 'https://www.facebook.com',
                                 },
                                 {
                                     icon: Twitter,
                                     label: 'X (Twitter)',
-                                    href: 'https://x.com/VenkatAgro',
+                                    href: 'https://x.com/as_hish09',
                                 },
                                 {
                                     icon: Instagram,
                                     label: 'Instagram',
-                                    href: 'https://www.instagram.com/venkateshawaraagro/',
+                                    href: 'https://www.instagram.com/as_hish.x09?igsh=MXBoMDljeGl4d3Iwaw==',
                                 },
                                 {
                                     icon: Youtube,
                                     label: 'YouTube',
-                                    href: 'https://www.youtube.com/channel/UCoivbxyv8RbYQv-yi9A9ojQ',
+                                    href: 'https://www.youtube.com',
                                 },
                             ].map((social) => (
                                 <a
