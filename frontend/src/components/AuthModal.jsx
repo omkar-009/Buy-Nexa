@@ -116,7 +116,7 @@ export default function AuthModal({ isOpen, onClose }) {
                         
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 text-sm font-bold tracking-widest text-gray-500">
-                                <span>SNITCH</span>
+                                <span>Buy Nexa</span>
                                 <span className="w-8 h-[1px] bg-gray-800" />
                                 <span>2026</span>
                             </div>

@@ -37,7 +37,7 @@ export default function Footer() {
                         <ul className="space-y-4 p-0">
                             {['Home', 'Products', 'About Us', 'Become a Seller', 'Cart'].map((item) => (
                                 <li key={item}>
-                                    <a href="#" className="text-sm font-black uppercase tracking-widest text-white/60 hover:text-white flex items-center gap-2 group transition-all">
+                                    <a href="#" className="text-sm font-medium uppercase tracking-widest text-white/60 hover:text-white flex items-center gap-2 group transition-all">
                                         {item} <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </a>
                                 </li>
@@ -51,7 +51,7 @@ export default function Footer() {
                         <ul className="space-y-4 p-0">
                             {['Shipping Policy', 'Return & Exchanges', 'Privacy Policy', 'Terms of Service', 'Contact Us'].map((item) => (
                                 <li key={item}>
-                                    <a href="#" className="text-sm font-black uppercase tracking-widest text-white/60 hover:text-white transition-all">
+                                    <a href="#" className="text-sm cursor-pointer font-medium uppercase tracking-widest text-white/60 hover:text-white transition-all">
                                         {item}
                                     </a>
                                 </li>
@@ -67,7 +67,7 @@ export default function Footer() {
                             <input 
                                 type="email" 
                                 placeholder="YOUR EMAIL" 
-                                className="w-full bg-white/5 border border-white/10 rounded-full py-4 px-6 text-xs font-black tracking-widest focus:outline-none focus:border-white transition-all"
+                                className="w-full bg-white/5 border border-white/10 rounded-full py-4 px-6 text-xs font-medium tracking-widest focus:outline-none focus:border-white transition-all"
                             />
                             <button className="absolute right-2 top-2 bottom-2 bg-white text-black px-6 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-gray-200 transition-all">
                                 Join
@@ -88,8 +88,8 @@ export default function Footer() {
                     </button>
                     <div className="flex gap-8">
                         <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">VISA</span>
-                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">MASTER</span>
-                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">AMEX</span>
+                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">UPI</span>
+                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">NET BANKING</span>
                     </div>
                 </div>
             </div>
