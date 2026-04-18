@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
-import Register from './pages/Register';
 import Cart from './pages/Cart';
 import OrderHistory from './pages/OrderHistory';
 import Account from './pages/Account';
@@ -10,10 +9,13 @@ import SearchResults from './pages/SearchResults';
 import ProductDescription from './components/ProductDescription';
 import ProductsPage from './components/ProductsPage';
 import OrderTracking from './pages/TrackOrder';
+import AboutUs from './pages/AboutUs';
+import BecomeSeller from './pages/BecomeSeller';
 import Layout from './layout/layout';
 import './App.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AnimatePresence } from 'framer-motion';
 
 function App() {
     return (
@@ -27,22 +29,25 @@ function App() {
                     closeOnClick
                     pauseOnHover
                     draggable
-                    theme="light"
+                    theme="dark"
                 />
-                <Routes>
-                    <Route path="/" element={<Navigate to="/home" replace />} />
-                    <Route element={<Layout />}>
-                        <Route path="/home" element={<Home />} />
-                        <Route path="/cart" element={<Cart />} />
-                        <Route path="/orders" element={<OrderHistory />} />
-                        <Route path="/account" element={<Account />} />
-                        <Route path="/search" element={<SearchResults />} />
-                        <Route path="/product/:id" element={<ProductDescription />} />
-                        <Route path="/category/:category" element={<ProductsPage />} />
-                        <Route path="/order/:orderId" element={<OrderTracking />} />
-                    </Route>
-                    <Route path="/register" element={<Register />} />
-                </Routes>
+                <AnimatePresence mode="wait">
+                    <Routes>
+                        <Route path="/" element={<Navigate to="/home" replace />} />
+                        <Route element={<Layout />}>
+                            <Route path="/home" element={<Home />} />
+                            <Route path="/cart" element={<Cart />} />
+                            <Route path="/orders" element={<OrderHistory />} />
+                            <Route path="/account" element={<Account />} />
+                            <Route path="/search" element={<SearchResults />} />
+                            <Route path="/about" element={<AboutUs />} />
+                            <Route path="/become-seller" element={<BecomeSeller />} />
+                            <Route path="/product/:id" element={<ProductDescription />} />
+                            <Route path="/category/:category" element={<ProductsPage />} />
+                            <Route path="/order/:orderId" element={<OrderTracking />} />
+                        </Route>
+                    </Routes>
+                </AnimatePresence>
             </Router>
         </AuthProvider>
     );

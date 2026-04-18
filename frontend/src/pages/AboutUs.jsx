@@ -1,135 +1,121 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
+import { motion } from 'framer-motion';
 import Footer from '../components/Footer';
 
 export default function AboutUs() {
+    const fadeIn = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8 } }
+    };
+
+    const staggerContainer = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2
+            }
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-white font-sans overflow-x-hidden">
-            <Navbar />
-
+        <div className="min-h-screen bg-white font-sans overflow-x-hidden pt-20">
             {/* Hero Section */}
-            <div className="relative pt-32 pb-20 bg-green-50/50 overflow-hidden sm:pt-24 sm:pb-12">
-                <div className="max-w-[1280px] mx-auto px-6 lg:px-4 relative z-10">
-                    <div className="flex flex-col gap-6 max-w-2xl">
-                        <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-green-100 shadow-sm w-fit">
-                            <span className="text-[10px] font-black text-green-600 uppercase tracking-[0.2em]">
-                                Our Story
-                            </span>
-                        </div>
-                        <h1 className="text-6xl font-black text-gray-900 leading-[1.1] m-0 sm:text-4xl tracking-tight">
-                            Bringing the Farm <br />
-                            <span className="text-green-600 underline decoration-green-200 underline-offset-8">
-                                To Your Doorstep
-                            </span>
-                        </h1>
-                        <p className="text-xl text-gray-600 font-medium leading-relaxed m-0 sm:text-base">
-                            Vcoop is more than just a grocery store. We are a community-driven
-                            initiative connecting conscious consumers directly with pure, fresh, and
-                            local produce.
-                        </p>
-                    </div>
+            <div className="relative py-32 bg-black text-white overflow-hidden">
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.2 }}
+                    className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')] bg-cover bg-center grayscale"
+                />
+                
+                <div className="max-w-[1440px] mx-auto px-6 relative z-10 text-center">
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                    >
+                        <motion.span variants={fadeIn} className="inline-block text-[10px] font-black uppercase tracking-[0.5em] mb-6 opacity-60">
+                            Our Philosophy
+                        </motion.span>
+                        <motion.h1 variants={fadeIn} className="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9] uppercase">
+                            Redefining <br />
+                            <span className="text-gray-500 italic">Commerce.</span>
+                        </motion.h1>
+                        <motion.p variants={fadeIn} className="text-xl md:text-2xl text-gray-400 font-medium max-w-3xl mx-auto leading-relaxed">
+                            Buy Nexa is a visionary platform dedicated to bringing premium, fresh, and essential goods directly to the modern consumer.
+                        </motion.p>
+                    </motion.div>
                 </div>
-
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-green-100/30 to-transparent pointer-events-none"></div>
-                <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-green-200/20 rounded-full blur-3xl pointer-events-none"></div>
             </div>
 
             {/* Mission Section */}
-            <div className="py-24 max-w-[1280px] mx-auto px-6 lg:px-4 sm:py-16">
-                <div className="grid grid-cols-2 gap-20 items-center sm:grid-cols-1 sm:gap-12">
-                    <div className="bg-gray-50 rounded-[40px] p-12 aspect-square flex flex-col justify-center gap-8 relative overflow-hidden sm:p-8">
-                        <div className="w-16 h-1 bg-green-500 rounded-full"></div>
-                        <h2 className="text-4xl font-black text-gray-900 m-0 leading-tight">
-                            Our Mission is <br />
+            <div className="py-32 max-w-[1440px] mx-auto px-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                    <motion.div 
+                        initial={{ opacity: 0, x: -50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                        className="bg-gray-50 p-16 rounded-[40px] aspect-square flex flex-col justify-center gap-10 relative overflow-hidden"
+                    >
+                        <div className="w-20 h-1 bg-black rounded-full"></div>
+                        <h2 className="text-5xl font-black text-black leading-tight uppercase tracking-tighter">
+                            Radical <br />
                             Transparency.
                         </h2>
-                        <p className="text-gray-600 font-medium leading-loose m-0">
-                            We believe everyone deserves access to high-quality groceries without
-                            the mystery. By working directly with farmers and trusted processors, we
-                            ensure every product in our catalog meets the highest standards of
-                            purity and freshness.
+                        <p className="text-gray-600 text-lg font-medium leading-relaxed">
+                            We believe in the power of direct connections. By eliminating unnecessary layers, we bring you closer to the source of your daily essentials, ensuring unparalleled quality and ethics in every transaction.
                         </p>
-                        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/50 rounded-full blur-2xl"></div>
-                    </div>
+                        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-black/5 rounded-full" />
+                    </motion.div>
 
-                    <div className="flex flex-col gap-12 sm:gap-8">
-                        <div className="flex flex-col gap-4">
-                            <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 shadow-sm mb-2">
-                                <span className="text-2xl font-black">01</span>
-                            </div>
-                            <h3 className="text-xl font-black text-gray-900 m-0">
-                                Direct Sourcing
-                            </h3>
-                            <p className="text-gray-500 font-medium leading-relaxed m-0 italic">
-                                Eliminating middlemen to provide better value to both farmers and
-                                customers.
-                            </p>
-                        </div>
-
-                        <div className="flex flex-col gap-4 border-t border-gray-100 pt-8">
-                            <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 shadow-sm mb-2">
-                                <span className="text-2xl font-black">02</span>
-                            </div>
-                            <h3 className="text-xl font-black text-gray-900 m-0">Quality First</h3>
-                            <p className="text-gray-500 font-medium leading-relaxed m-0 italic">
-                                Rigorous quality checks for every item, from dry fruits to fresh
-                                produce.
-                            </p>
-                        </div>
-
-                        <div className="flex flex-col gap-4 border-t border-gray-100 pt-8">
-                            <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 shadow-sm mb-2">
-                                <span className="text-2xl font-black">03</span>
-                            </div>
-                            <h3 className="text-xl font-black text-gray-900 m-0">
-                                Modern Community
-                            </h3>
-                            <p className="text-gray-500 font-medium leading-relaxed m-0 italic">
-                                Merging traditional farming ethics with a seamless digital shopping
-                                experience.
-                            </p>
-                        </div>
-                    </div>
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                        className="space-y-16"
+                    >
+                        {[
+                            { id: '01', title: 'DIRECT ACCESS', desc: 'Direct sourcing ensures the freshest products reach our community without delays.' },
+                            { id: '02', title: 'PREMIUM QUALITY', desc: 'Rigorous selection process for every item, from the farm to your table.' },
+                            { id: '03', title: 'MODERN ETHOS', desc: 'Blending traditional farming values with a seamless digital lifestyle.' }
+                        ].map((item) => (
+                            <motion.div key={item.id} variants={fadeIn} className="flex flex-col gap-4 border-l-2 border-gray-100 pl-8 hover:border-black transition-colors">
+                                <span className="text-sm font-black text-gray-300">{item.id}</span>
+                                <h3 className="text-xl font-black text-black uppercase tracking-widest">{item.title}</h3>
+                                <p className="text-gray-500 font-medium italic">{item.desc}</p>
+                            </motion.div>
+                        ))}
+                    </motion.div>
                 </div>
             </div>
 
-            {/* Values Banner */}
-            <div className="bg-gray-900 py-24 sm:py-16">
-                <div className="max-w-[1280px] mx-auto px-6 lg:px-4 flex flex-col items-center text-center gap-12">
-                    <h2 className="text-4xl font-black text-white m-0 sm:text-3xl">
-                        Purity in Every Purchase
-                    </h2>
-                    <div className="grid grid-cols-4 gap-8 w-full sm:grid-cols-2">
-                        <div className="flex flex-col gap-2">
-                            <span className="text-3xl font-black text-green-400">100%</span>
-                            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
-                                Natural
-                            </span>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <span className="text-3xl font-black text-green-400">500+</span>
-                            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
-                                Products
-                            </span>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <span className="text-3xl font-black text-green-400">15m</span>
-                            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
-                                Delivery
-                            </span>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <span className="text-3xl font-black text-green-400">5k+</span>
-                            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">
-                                Customers
-                            </span>
-                        </div>
+            {/* Stats Section */}
+            <div className="bg-black py-32">
+                <div className="max-w-[1440px] mx-auto px-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-16 text-center">
+                        {[
+                            { label: 'Natural', value: '100%' },
+                            { label: 'Products', value: '500+' },
+                            { label: 'Fast Delivery', value: '15m' },
+                            { label: 'Community', value: '10k+' }
+                        ].map((stat) => (
+                            <motion.div 
+                                key={stat.label}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                className="flex flex-col gap-4"
+                            >
+                                <span className="text-5xl md:text-7xl font-black text-white tracking-tighter">{stat.value}</span>
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em]">{stat.label}</span>
+                            </motion.div>
+                        ))}
                     </div>
                 </div>
             </div>
-
-            <Footer />
         </div>
     );
 }

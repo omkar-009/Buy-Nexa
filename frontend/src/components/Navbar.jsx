@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Search, UserCircle, X } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ShoppingCart, Search, UserCircle, X, Menu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import useCartStore from '../store/useCartStore';
 import { useAuth } from '../context/AuthContext';
-import Login from '../components/Login';
+import AuthModal from './AuthModal';
 import useUserStore from '../store/useUserStore';
 import useProductStore from '../store/useProductStore';
 import '../App.css';
@@ -12,9 +13,11 @@ import logo from '../assets/bnLogo.png';
 
 export default function Navbar() {
     const navigate = useNavigate();
-    const [showLogin, setShowLogin] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showResults, setShowResults] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+    
     const searchRef = useRef(null);
     const resultsRef = useRef(null);
     const { getTotalItems, getTotalPrice } = useCartStore();
@@ -28,6 +31,15 @@ export default function Navbar() {
         searchProducts,
         clearSearch: clearStoreSearch,
     } = useProductStore();
+
+    // Scroll listener for sticky header effect
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     // fetch user profile
     useEffect(() => {
@@ -98,35 +110,53 @@ export default function Navbar() {
 
     return (
         <>
-            {/* Navbar */}
-            <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
-                <nav className="max-w-[1280px] mx-auto px-6 py-2.5 flex items-center justify-between gap-4">
-                    {/* Logo Section */}
-                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start overflow-hidden">
+            <motion.header 
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                className={`sticky top-0 z-[80] w-full transition-all duration-300 ${
+                    isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 py-2' : 'bg-white py-4'
+                }`}
+            >
+                <nav className="max-w-[1440px] mx-auto px-6 flex items-center justify-between gap-8">
+                    {/* Logo */}
+                    <Link to="/home" className="shrink-0 flex items-center">
                         <img
                             src={logo}
                             alt="Buy Nexa"
-                            className="w-[160px] md:w-[180px] mr-5 transition-transform duration-500 hover:scale-135 scale-125 origin-left"
+                            className="w-[140px] object-contain transition-transform duration-300 hover:scale-105"
                         />
+                    </Link>
+
+                    {/* Navigation Links */}
+                    <div className="hidden lg:flex items-center gap-8">
+                        {['HOME', 'ABOUT US', 'BECOME A SELLER'].map((item) => (
+                            <Link 
+                                key={item}
+                                to={item === 'HOME' ? '/home' : item === 'ABOUT US' ? '/about' : '/become-seller'}
+                                className="text-[12px] font-black tracking-[0.1em] text-gray-400 hover:text-black transition-colors"
+                            >
+                                {item}
+                            </Link>
+                        ))}
                     </div>
 
                     {/* Search Bar */}
                     <div
-                        className="flex-1 flex justify-center w-full max-w-xl relative"
+                        className="flex-1 hidden md:flex justify-center max-w-xl relative"
                         ref={searchRef}
                     >
                         <form
-                            className="relative w-full max-w-md group"
+                            className="relative w-full group"
                             onSubmit={handleSearchSubmit}
                         >
                             <Search
                                 size={18}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-500 transition-colors"
+                                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors"
                             />
                             <input
                                 type="text"
-                                placeholder="Search here"
-                                className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none text-sm transition-all focus:bg-white focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                placeholder="What are you looking for?"
+                                className="w-full pl-12 pr-10 py-3 bg-gray-50 border border-gray-100 rounded-full outline-none text-sm transition-all focus:bg-white focus:border-black focus:ring-0"
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                                 onFocus={() => {
@@ -138,9 +168,8 @@ export default function Navbar() {
                             {searchQuery && (
                                 <button
                                     type="button"
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
                                     onClick={clearSearch}
-                                    aria-label="Clear search"
                                 >
                                     <X size={16} />
                                 </button>
@@ -148,153 +177,103 @@ export default function Navbar() {
                         </form>
 
                         {/* Search Results Dropdown */}
-                        {showResults && (
-                            <div
-                                className="absolute top-full left-1/2 -translate-x-1/2 w-full max-w-md bg-white border border-gray-100 rounded-xl shadow-xl mt-2 overflow-hidden z-50"
-                                ref={resultsRef}
-                            >
-                                {loadingSearch ? (
-                                    <div className="p-10 text-center text-gray-500 text-sm italic">
-                                        Searching...
-                                    </div>
-                                ) : searchResults.length > 0 ? (
-                                    <>
-                                        <div className="flex justify-between items-center p-3 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                            <span>
-                                                {searchResults.length} result
-                                                {searchResults.length !== 1 ? 's' : ''} found
-                                            </span>
-                                            <button
-                                                className="text-green-600 hover:text-green-700 font-bold hover:underline"
-                                                onClick={() => {
-                                                    navigate(
-                                                        `/search?q=${encodeURIComponent(
-                                                            searchQuery.trim()
-                                                        )}`
-                                                    );
-                                                    setShowResults(false);
-                                                }}
-                                            >
-                                                View All
-                                            </button>
+                        <AnimatePresence>
+                            {showResults && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="absolute top-full left-0 w-full bg-white border border-gray-100 rounded-2xl shadow-xl mt-4 overflow-hidden z-[90]"
+                                    ref={resultsRef}
+                                >
+                                    {loadingSearch ? (
+                                        <div className="p-12 text-center text-gray-400 text-sm font-medium animate-pulse uppercase tracking-widest">
+                                            Searching...
                                         </div>
-                                        <div className="max-h-[400px] overflow-y-auto">
-                                            {searchResults.slice(0, 5).map((product) => (
+                                    ) : searchResults.length > 0 ? (
+                                        <div className="max-h-[500px] overflow-y-auto">
+                                            <div className="p-4 bg-gray-50/50 border-b border-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                Results ({searchResults.length})
+                                            </div>
+                                            {searchResults.slice(0, 6).map((product) => (
                                                 <div
                                                     key={product.id}
-                                                    className="flex items-center gap-4 p-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer"
-                                                    onClick={() =>
-                                                        handleSearchResultClick(product.id)
-                                                    }
+                                                    className="flex items-center gap-6 p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer group"
+                                                    onClick={() => handleSearchResultClick(product.id)}
                                                 >
-                                                    <div className="w-12 h-12 rounded-lg border border-gray-100 overflow-hidden bg-white shrink-0 flex items-center justify-center p-1">
+                                                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-white shrink-0 flex items-center justify-center border border-transparent group-hover:border-black/5 p-2 transition-all">
                                                         <img
-                                                            src={
-                                                                product.imageUrls &&
-                                                                product.imageUrls[0]
-                                                                    ? product.imageUrls[0]
-                                                                    : '/placeholder.png'
-                                                            }
+                                                            src={product.imageUrls?.[0] || '/placeholder.png'}
                                                             alt={product.name}
-                                                            className="w-full h-full object-contain"
-                                                            onError={(e) => {
-                                                                e.target.src = '/placeholder.png';
-                                                            }}
+                                                            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                                                         />
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="text-sm font-semibold text-gray-900 truncate mb-0.5">
+                                                    <div className="flex-1">
+                                                        <h4 className="text-sm font-bold text-black uppercase tracking-tight mb-1">
                                                             {product.name}
                                                         </h4>
-                                                        <p className="text-xs text-gray-500 mb-0.5">
-                                                            {product.quantity}
-                                                        </p>
-                                                        <p className="text-sm font-bold text-green-600">
-                                                            ₹{product.price}
+                                                        <p className="text-xs text-gray-400 font-medium">
+                                                            {product.quantity} • ₹{product.price}
                                                         </p>
                                                     </div>
                                                 </div>
                                             ))}
-                                            {searchResults.length > 5 && (
-                                                <div
-                                                    className="flex items-center gap-4 p-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer justify-center"
-                                                    onClick={() => {
-                                                        navigate(
-                                                            `/search?q=${encodeURIComponent(
-                                                                searchQuery.trim()
-                                                            )}`
-                                                        );
-                                                        setShowResults(false);
-                                                    }}
-                                                >
-                                                    <span className="text-sm font-medium text-green-600">
-                                                        View all {searchResults.length} results →
-                                                    </span>
-                                                </div>
-                                            )}
+                                            <button 
+                                                className="w-full p-4 text-[10px] font-black uppercase tracking-widest text-black hover:bg-black hover:text-white transition-all"
+                                                onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`)}
+                                            >
+                                                View all results
+                                            </button>
                                         </div>
-                                    </>
-                                ) : searchQuery.trim().length >= 2 ? (
-                                    <div className="p-10 text-center text-gray-500 text-sm font-medium">
-                                        No products found
-                                    </div>
-                                ) : null}
-                            </div>
-                        )}
+                                    ) : (
+                                        <div className="p-12 text-center text-gray-400 text-sm font-medium uppercase tracking-widest">
+                                            No products found
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    {/* Login & Cart */}
-                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                    {/* Actions */}
+                    <div className="flex items-center gap-6">
                         {isAuthenticated() ? (
                             <button
-                                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 font-medium text-sm transition-all active:scale-95"
+                                className="group flex items-center gap-2"
                                 onClick={() => navigate('/account')}
-                                title="My Account"
                             >
-                                <UserCircle size={20} className="text-green-500" />
-                                <span>Account</span>
+                                <UserCircle size={22} className="text-gray-400 group-hover:text-black transition-colors" />
+                                <span className="hidden sm:block text-[11px] font-black uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors">ACCOUNT</span>
                             </button>
                         ) : (
                             <button
-                                className="px-6 py-2 text-sm font-semibold text-gray-700 hover:text-green-600 transition-all rounded-lg hover:bg-green-50"
-                                onClick={() => setShowLogin(true)}
+                                className="text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
+                                onClick={() => setIsAuthModalOpen(true)}
                             >
-                                Login
+                                LOGIN
                             </button>
                         )}
 
                         <button
-                            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold transition-all min-w-[120px] active:scale-95 shadow-sm hover:shadow-md ${
-                                cartItemCount > 0
-                                    ? 'bg-green-600 text-white hover:bg-green-700'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
+                            className="relative group p-2"
                             onClick={() => navigate('/cart')}
                         >
-                            <ShoppingCart
-                                size={24}
-                                className={`shrink-0 transition-all duration-200 stroke-[2.5] ${cartItemCount > 0 ? 'text-white stroke-white animate-bounce' : 'text-gray-700'}`}
-                                strokeWidth={2}
-                            />
-                            {cartItemCount > 0 ? (
-                                <div className="flex flex-col items-start leading-none">
-                                    <span className="text-[11px] font-medium opacity-90">
-                                        {cartItemCount} {cartItemCount === 1 ? 'item' : 'items'}
-                                    </span>
-                                    <span className="text-base font-bold">
-                                        ₹{Math.round(cartTotalPrice)}
-                                    </span>
-                                </div>
-                            ) : (
-                                <span className="text-sm font-bold">My Cart</span>
+                            <ShoppingCart size={22} className="text-black transition-transform group-hover:-translate-y-0.5" />
+                            {cartItemCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-black text-white text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                                    {cartItemCount}
+                                </span>
                             )}
+                        </button>
+                        
+                        <button className="lg:hidden p-2">
+                            <Menu size={22} />
                         </button>
                     </div>
                 </nav>
-            </header>
+            </motion.header>
 
-            {/* Login Modal */}
-            <Login showLogin={showLogin} setShowLogin={setShowLogin} />
+            <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
         </>
     );
 }

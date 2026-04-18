@@ -1,5 +1,6 @@
 import React from 'react';
-import { Star, Minus, Plus } from 'lucide-react';
+import { Minus, Plus, ShoppingBag } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const ProductCard = ({
     product,
@@ -10,62 +11,70 @@ const ProductCard = ({
     onClick,
 }) => {
     return (
-        <div
-            className="min-w-[240px] max-w-[240px] bg-white rounded-xl shadow-md overflow-hidden flex flex-col items-center p-3 border border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group"
+        <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            whileHover={{ y: -8 }}
+            className="flex flex-col bg-white overflow-hidden group cursor-pointer border border-transparent hover:border-black/5 transition-all duration-300 rounded-2xl"
             onClick={onClick}
         >
             {/* Image Section */}
-            <div className="w-full h-[150px] flex items-center justify-center bg-gray-50 rounded-lg mb-3 overflow-hidden group-hover:bg-white transition-colors relative">
-                <img
-                    src={
-                        product.imageUrls && product.imageUrls[0]
-                            ? product.imageUrls[0]
-                            : '/placeholder.png'
-                    }
+            <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-2xl p-4">
+                <motion.img
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
+                    src={product.imageUrls?.[0] || '/placeholder.png'}
                     alt={product.name}
-                    className="w-full h-full object-contain mb-1 transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-full object-contain mix-blend-multiply transition-all duration-500"
                     onError={(e) => {
                         e.target.src = '/placeholder.png';
                     }}
                 />
+                
                 {product.discount > 0 && (
-                    <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter">
-                        {product.discount}% OFF
+                    <div className="absolute top-4 left-4 bg-black text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                        -{product.discount}%
                     </div>
                 )}
-            </div>
 
-            {/* Product Name */}
-            <p className="text-sm font-semibold text-gray-800 m-0 line-clamp-2 min-h-[40px] leading-tight w-full">
-                {product.name}
-            </p>
-
-            {/* Row 1: Qty and Rating */}
-            <div className="flex justify-between items-center w-full mt-2">
-                <p className="text-[12px] text-gray-500 m-0 font-medium">{product.quantity}</p>
-                <div className="flex items-center gap-1 bg-green-50 px-1.5 py-0.5 rounded-md">
-                    <Star size={12} fill="#22c55e" stroke="#22c55e" />
-                    <span className="text-[11px] font-black text-green-700">
-                        {(Number(product.rating) || 0).toFixed(1)}
-                    </span>
-                </div>
-            </div>
-
-            {/* Row 2: Price and Add Button */}
-            <div className="flex justify-between items-center w-full mt-3 pt-2 border-t border-gray-50">
-                <div className="flex flex-col">
-                    <span className="text-base font-black text-gray-900">₹{product.price}</span>
-                    {product.mrp > product.price && (
-                        <span className="text-[10px] text-gray-400 line-through">
-                            ₹{product.mrp}
-                        </span>
+                {/* Quick Add Overlay */}
+                <div className="absolute inset-x-0 bottom-4 px-4 translate-y-12 group-hover:translate-y-0 transition-transform duration-300">
+                    {cartQuantity === 0 && (
+                        <button
+                            className="w-full bg-black text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-gray-900 flex items-center justify-center gap-2"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onAddToCart(product);
+                            }}
+                        >
+                            <ShoppingBag size={14} /> Add to Bag
+                        </button>
                     )}
                 </div>
+            </div>
 
-                {cartQuantity > 0 ? (
-                    <div className="flex items-center bg-green-600 rounded-lg overflow-hidden shadow-sm">
+            {/* Product Info */}
+            <div className="py-5 px-1">
+                <div className="flex justify-between items-start gap-2 mb-1">
+                    <h3 className="text-sm font-black text-black uppercase tracking-tight line-clamp-1 flex-1">
+                        {product.name}
+                    </h3>
+                    <span className="text-sm font-black text-black shrink-0">₹{product.price}</span>
+                </div>
+                
+                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-4">
+                    {product.quantity}
+                </p>
+
+                {cartQuantity > 0 && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center justify-between bg-black text-white p-1 rounded-xl"
+                    >
                         <button
-                            className="w-8 h-8 flex items-center justify-center text-white border-none bg-transparent hover:bg-black/10 transition-colors cursor-pointer"
+                            className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white transition-colors"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onDecrease(product.id);
@@ -73,11 +82,11 @@ const ProductCard = ({
                         >
                             <Minus size={14} />
                         </button>
-                        <span className="text-xs font-black text-white w-6 text-center">
+                        <span className="text-xs font-black w-8 text-center">
                             {cartQuantity}
                         </span>
                         <button
-                            className="w-8 h-8 flex items-center justify-center text-white border-none bg-transparent hover:bg-black/10 transition-colors cursor-pointer"
+                            className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white transition-colors"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onIncrease(product.id);
@@ -85,20 +94,10 @@ const ProductCard = ({
                         >
                             <Plus size={14} />
                         </button>
-                    </div>
-                ) : (
-                    <button
-                        className="bg-white text-green-600 border border-green-600 py-1.5 px-4 rounded-lg font-bold text-sm cursor-pointer transition-all duration-200 hover:bg-green-600 hover:text-white"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onAddToCart(product);
-                        }}
-                    >
-                        ADD
-                    </button>
+                    </motion.div>
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 };
 

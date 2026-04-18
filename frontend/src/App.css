@@ -5,8 +5,8 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background-color: #f9fafb; /* Matches bg-gray-50 */
-    color: #111827; /* Matches text-gray-900 */
+    background-color: #ffffff;
+    color: #000000;
     font-family:
         'Inter',
         -apple-system,
@@ -24,11 +24,16 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar Hide Utility */
+/* Custom Utilities */
 @utility scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
     &::-webkit-scrollbar {
         display: none;
     }
+}
+
+/* Smooth Scroll */
+html {
+    scroll-behavior: smooth;
 }
