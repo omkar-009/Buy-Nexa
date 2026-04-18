@@ -95,7 +95,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.95, opacity: 0 }}
                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                    className="relative bg-white w-full max-w-4xl min-h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+                    className="relative bg-white w-full max-w-4xl max-h-[90vh] md:min-h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
                 >
                     {/* Visual Side (LHS) */}
                     <div className="hidden md:flex md:w-1/2 bg-black text-white p-12 flex-col justify-between relative overflow-hidden">
@@ -124,7 +124,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     </div>
 
                     {/* Form Side (RHS) */}
-                    <div className="flex-1 p-8 md:p-12 bg-white relative">
+                    <div className="flex-1 p-8 md:p-12 bg-white relative overflow-y-auto custom-scrollbar">
                         <button 
                             onClick={onClose}
                             className="absolute right-6 top-6 text-gray-400 hover:text-black transition-colors"

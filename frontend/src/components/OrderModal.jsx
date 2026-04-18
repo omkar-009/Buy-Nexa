@@ -16,7 +16,7 @@ export default function OrderModal({ isOpen, onClose, orderSummary, userData, lo
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-[40px] w-full max-w-2xl overflow-hidden relative shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-8 duration-700"
+                className="bg-white rounded-[40px] w-full max-w-2xl max-h-[90vh] overflow-hidden relative shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-8 duration-700 flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
                 <button
@@ -26,7 +26,7 @@ export default function OrderModal({ isOpen, onClose, orderSummary, userData, lo
                     <X size={24} />
                 </button>
 
-                <div className="p-12 sm:p-8">
+                <div className="p-12 sm:p-8 overflow-y-auto custom-scrollbar">
                     {/* Success Header */}
                     <div className="flex flex-col items-center text-center gap-6 mb-12">
                         <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center text-green-500 shadow-inner animate-bounce">
@@ -37,7 +37,7 @@ export default function OrderModal({ isOpen, onClose, orderSummary, userData, lo
                                 Order Placed!
                             </h2>
                             <p className="text-gray-500 font-medium text-lg m-0">
-                                Thank you for shopping with Vcoop.
+                                Thank you for shopping with Buy Nexa.
                             </p>
                         </div>
                     </div>

@@ -17,6 +17,7 @@ export default function Navbar() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showResults, setShowResults] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
     const searchRef = useRef(null);
     const resultsRef = useRef(null);
@@ -133,7 +134,7 @@ export default function Navbar() {
                             <Link 
                                 key={item}
                                 to={item === 'HOME' ? '/home' : item === 'ABOUT US' ? '/about' : '/become-seller'}
-                                className="text-[12px] font-black tracking-[0.1em] text-gray-400 hover:text-black transition-colors"
+                                className="text-[12px] font-black tracking-[0.1em] text-gray-400 hover:text-black transition-colors no-underline"
                             >
                                 {item}
                             </Link>
@@ -266,12 +267,80 @@ export default function Navbar() {
                             )}
                         </button>
                         
-                        <button className="lg:hidden p-2">
+                        <button 
+                            className="lg:hidden p-2 text-gray-400 hover:text-black transition-colors"
+                            onClick={() => setIsMobileMenuOpen(true)}
+                        >
                             <Menu size={22} />
                         </button>
                     </div>
                 </nav>
             </motion.header>
+
+            {/* Mobile Menu Overlay */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+                        />
+                        <motion.div
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed top-0 right-0 bottom-0 w-[300px] bg-white z-[110] p-8 flex flex-col shadow-2xl"
+                        >
+                            <button 
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="self-end p-2 text-gray-400 hover:text-black transition-colors mb-12"
+                            >
+                                <X size={24} />
+                            </button>
+
+                            <div className="flex flex-col gap-8">
+                                {['HOME', 'ABOUT US', 'BECOME A SELLER', 'ACCOUNT'].map((item) => {
+                                    if (item === 'ACCOUNT' && !isAuthenticated()) return null;
+                                    const path = item === 'HOME' ? '/home' : item === 'ABOUT US' ? '/about' : item === 'ACCOUNT' ? '/account' : '/become-seller';
+                                    return (
+                                        <Link
+                                            key={item}
+                                            to={path}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="text-2xl font-black uppercase tracking-tighter text-gray-300 hover:text-black transition-colors no-underline"
+                                        >
+                                            {item}
+                                        </Link>
+                                    );
+                                })}
+                                {!isAuthenticated() && (
+                                    <button
+                                        onClick={() => {
+                                            setIsMobileMenuOpen(false);
+                                            setIsAuthModalOpen(true);
+                                        }}
+                                        className="text-2xl font-black uppercase tracking-tighter text-left text-gray-300 hover:text-black transition-colors border-none bg-transparent p-0 cursor-pointer"
+                                    >
+                                        LOGIN / JOIN
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="mt-auto border-t border-gray-100 pt-8">
+                                <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">
+                                    <span>BUY NEXA</span>
+                                    <span className="w-4 h-px bg-gray-200" />
+                                    <span>2026</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
 
             <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
         </>

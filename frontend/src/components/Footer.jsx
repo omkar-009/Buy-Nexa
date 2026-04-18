@@ -1,11 +1,28 @@
 import React from 'react';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Youtube, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    const navLinks = [
+        { name: 'Home', path: '/home' },
+        { name: 'Products', path: '/category/DryFruits' },
+        { name: 'About Us', path: '/about' },
+        { name: 'Become a Seller', path: '/become-seller' },
+        { name: 'Cart', path: '/cart' },
+    ];
+
+    const supportLinks = [
+        { name: 'Shipping Policy', path: '/about' },
+        { name: 'Return & Exchanges', path: '/about' },
+        { name: 'Privacy Policy', path: '/about' },
+        { name: 'Terms of Service', path: '/about' },
+        { name: 'Contact Us', path: '/about' },
+    ];
 
     return (
         <footer className="bg-black text-white pt-24 pb-12 px-6">
@@ -35,11 +52,11 @@ export default function Footer() {
                     <div>
                         <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-8">Navigation</h4>
                         <ul className="space-y-4 p-0">
-                            {['Home', 'Products', 'About Us', 'Become a Seller', 'Cart'].map((item) => (
-                                <li key={item}>
-                                    <a href="#" className="text-sm font-medium uppercase tracking-widest text-white/60 hover:text-white flex items-center gap-2 group transition-all">
-                                        {item} <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </a>
+                            {navLinks.map((link) => (
+                                <li key={link.name}>
+                                    <Link to={link.path} className="text-sm font-medium uppercase tracking-widest text-white/60 hover:text-white flex items-center gap-2 group transition-all no-underline">
+                                        {link.name} <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
@@ -49,11 +66,11 @@ export default function Footer() {
                     <div>
                         <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-8">Support</h4>
                         <ul className="space-y-4 p-0">
-                            {['Shipping Policy', 'Return & Exchanges', 'Privacy Policy', 'Terms of Service', 'Contact Us'].map((item) => (
-                                <li key={item}>
-                                    <a href="#" className="text-sm cursor-pointer font-medium uppercase tracking-widest text-white/60 hover:text-white transition-all">
-                                        {item}
-                                    </a>
+                            {supportLinks.map((link) => (
+                                <li key={link.name}>
+                                    <Link to={link.path} className="text-sm cursor-pointer font-medium uppercase tracking-widest text-white/60 hover:text-white transition-all no-underline">
+                                        {link.name}
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
