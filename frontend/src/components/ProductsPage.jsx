@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import useCartStore from '../store/useCartStore';
 import api from '../../utils/api';
 import ProductCard from './ProductCard';
+import Loader from './Loader';
 
 export default function ProductsPage() {
     const { category } = useParams();
@@ -75,16 +76,7 @@ export default function ProductsPage() {
                 {/* Product Grid */}
                 <div className="min-h-[400px]">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-32 gap-6">
-                            <motion.div
-                                animate={{ rotate: 360 }}
-                                transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-                                className="w-12 h-12 border-4 border-black/10 border-t-black rounded-full"
-                            />
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
-                                Curating Excellence...
-                            </p>
-                        </div>
+                        <Loader />
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-32 text-center gap-8">
                             <div className="space-y-2">

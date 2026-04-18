@@ -8,9 +8,12 @@ import api from '../../utils/api';
 
 export default function AuthModal({ isOpen, onClose }) {
     const navigate = useNavigate();
-    const { login } = useAuth();
-    const [view, setView] = useState('login'); // 'login' or 'register'
+    const { login, verifyOTP, resendOTP } = useAuth();
+    const [view, setView] = useState('login'); // 'login', 'register', 'otp'
     const [loading, setLoading] = useState(false);
+    const [otp, setOtp] = useState('');
+    const [otpType, setOtpType] = useState('login'); // 'login' or 'registration'
+    const [resendTimer, setResendTimer] = useState(0);
     const [formData, setFormData] = useState({
         identifier: '',
         password: '',
@@ -30,9 +33,15 @@ export default function AuthModal({ isOpen, onClose }) {
                 password: formData.password,
             });
             if (result.success) {
-                toast.success('Welcome back!');
-                onClose();
-                navigate('/home');
+                if (result.verificationRequired) {
+                    setOtpType('login');
+                    setView('otp');
+                    toast.info('Please verify your email');
+                } else {
+                    toast.success('Welcome back!');
+                    onClose();
+                    navigate('/home');
+                }
             } else {
                 toast.error(result.message || 'Invalid credentials');
             }
@@ -55,15 +64,21 @@ export default function AuthModal({ isOpen, onClose }) {
             });
 
             if (response.data.success) {
-                toast.success('Account created! Logging you in...');
-                // Auto login after registration
-                const loginResult = await login({
-                    identifier: formData.email,
-                    password: formData.password,
-                });
-                if (loginResult.success) {
-                    onClose();
-                    navigate('/home');
+                if (response.data.verificationRequired) {
+                    setOtpType('registration');
+                    setView('otp');
+                    toast.info('Please verify your email to complete registration');
+                } else {
+                    toast.success('Account created! Logging you in...');
+                    // Auto login after registration
+                    const loginResult = await login({
+                        identifier: formData.email,
+                        password: formData.password,
+                    });
+                    if (loginResult.success) {
+                        onClose();
+                        navigate('/home');
+                    }
                 }
             } else {
                 toast.error(response.data.message || 'Registration failed');
@@ -72,6 +87,57 @@ export default function AuthModal({ isOpen, onClose }) {
             toast.error(err.response?.data?.message || 'Error creating account');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleVerifyOTP = async (e) => {
+        e.preventDefault();
+        if (otp.length !== 6) return toast.error('Please enter 6-digit OTP');
+        
+        setLoading(true);
+        try {
+            const result = await verifyOTP({
+                email: formData.email || formData.identifier,
+                otp,
+                type: otpType
+            });
+
+            if (result.success) {
+                toast.success('Verification successful!');
+                onClose();
+                navigate('/home');
+            } else {
+                toast.error(result.message || 'Invalid OTP');
+            }
+        } catch (err) {
+            toast.error('Verification failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResend = async () => {
+        if (resendTimer > 0) return;
+        
+        try {
+            const result = await resendOTP(formData.email || formData.identifier, otpType);
+            if (result.success) {
+                toast.success('New OTP sent!');
+                setResendTimer(30);
+                const interval = setInterval(() => {
+                    setResendTimer(prev => {
+                        if (prev <= 1) {
+                            clearInterval(interval);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+            } else {
+                toast.error(result.message || 'Failed to resend OTP');
+            }
+        } catch (err) {
+            toast.error('Error resending OTP');
         }
     };
 
@@ -101,12 +167,13 @@ export default function AuthModal({ isOpen, onClose }) {
                     <div className="hidden md:flex md:w-1/2 bg-black text-white p-12 flex-col justify-between relative overflow-hidden">
                         <div className="relative z-10">
                             <h2 className="text-4xl font-bold tracking-tighter mb-4">
-                                {view === 'login' ? 'WELCOME BACK.' : 'JOIN THE CLUB.'}
+                                {view === 'login' ? 'WELCOME BACK.' : view === 'register' ? 'JOIN THE CLUB.' : 'VERIFY EMAIL.'}
                             </h2>
                             <p className="text-gray-400 font-medium">
                                 {view === 'login'
                                     ? 'Access your account and explore the latest drops.'
-                                    : 'Create an account for a seamless shopping experience.'}
+                                    : view === 'register' ? 'Create an account for a seamless shopping experience.'
+                                    : 'We\'ve sent a 6-digit code to your email.'}
                             </p>
                         </div>
 
@@ -144,104 +211,153 @@ export default function AuthModal({ isOpen, onClose }) {
                                 </p>
                             </div>
 
-                            <form
-                                onSubmit={view === 'login' ? handleLogin : handleRegister}
-                                className="space-y-4"
-                            >
-                                {view === 'register' && (
-                                    <>
+                            {view === 'otp' ? (
+                                <form onSubmit={handleVerifyOTP} className="space-y-6">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-end">
+                                            <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Security Code</span>
+                                            <button 
+                                                type="button"
+                                                onClick={handleResend}
+                                                disabled={resendTimer > 0}
+                                                className="text-[10px] font-black uppercase tracking-widest text-black hover:opacity-70 disabled:opacity-30 transition-opacity"
+                                            >
+                                                {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
+                                            </button>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            maxLength={6}
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                                            placeholder="000000"
+                                            className="w-full text-center text-4xl font-black tracking-[0.5em] py-4 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-black transition-all placeholder:text-gray-200"
+                                            required
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full bg-black text-white py-4 rounded-lg font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-gray-900 transition-all active:scale-[0.98] disabled:opacity-50"
+                                    >
+                                        {loading ? (
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <>Verify Account <ArrowRight size={16} /></>
+                                        )}
+                                    </button>
+
+                                    <button 
+                                        type="button"
+                                        onClick={() => setView('login')}
+                                        className="w-full text-center text-xs font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
+                                    >
+                                        Back to Login
+                                    </button>
+                                </form>
+                            ) : (
+                                <>
+                                    <form
+                                        onSubmit={view === 'login' ? handleLogin : handleRegister}
+                                        className="space-y-4"
+                                    >
+                                        {view === 'register' && (
+                                            <>
+                                                <div className="relative">
+                                                    <User
+                                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                                        size={18}
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        name="username"
+                                                        placeholder="Full Name"
+                                                        required
+                                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-lg outline-none focus:border-black transition-all"
+                                                        onChange={handleChange}
+                                                    />
+                                                </div>
+                                                <div className="relative">
+                                                    <Phone
+                                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                                        size={18}
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        name="contact_no"
+                                                        placeholder="Contact Number"
+                                                        required
+                                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-lg outline-none focus:border-black transition-all"
+                                                        onChange={handleChange}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
                                         <div className="relative">
-                                            <User
+                                            <Mail
                                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                                                 size={18}
                                             />
                                             <input
-                                                type="text"
-                                                name="username"
-                                                placeholder="Full Name"
+                                                type={view === 'login' ? 'text' : 'email'}
+                                                name={view === 'login' ? 'identifier' : 'email'}
+                                                placeholder={
+                                                    view === 'login' ? 'Email or Phone' : 'Email Address'
+                                                }
                                                 required
                                                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-lg outline-none focus:border-black transition-all"
                                                 onChange={handleChange}
                                             />
                                         </div>
+
                                         <div className="relative">
-                                            <Phone
+                                            <Lock
                                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                                                 size={18}
                                             />
                                             <input
-                                                type="text"
-                                                name="contact_no"
-                                                placeholder="Contact Number"
+                                                type="password"
+                                                name="password"
+                                                placeholder="Password"
                                                 required
                                                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-lg outline-none focus:border-black transition-all"
                                                 onChange={handleChange}
                                             />
                                         </div>
-                                    </>
-                                )}
 
-                                <div className="relative">
-                                    <Mail
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                                        size={18}
-                                    />
-                                    <input
-                                        type={view === 'login' ? 'text' : 'email'}
-                                        name={view === 'login' ? 'identifier' : 'email'}
-                                        placeholder={
-                                            view === 'login' ? 'Email or Phone' : 'Email Address'
-                                        }
-                                        required
-                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-lg outline-none focus:border-black transition-all"
-                                        onChange={handleChange}
-                                    />
-                                </div>
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="w-full bg-black text-white py-4 rounded-lg font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-gray-900 transition-all hover:gap-3 active:scale-[0.98] disabled:opacity-50"
+                                        >
+                                            {loading ? (
+                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            ) : (
+                                                <>
+                                                    {view === 'login' ? 'Login' : 'Create Account'}
+                                                    <ArrowRight size={16} />
+                                                </>
+                                            )}
+                                        </button>
+                                    </form>
 
-                                <div className="relative">
-                                    <Lock
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                                        size={18}
-                                    />
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        placeholder="Password"
-                                        required
-                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-lg outline-none focus:border-black transition-all"
-                                        onChange={handleChange}
-                                    />
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="w-full bg-black text-white py-4 rounded-lg font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-gray-900 transition-all hover:gap-3 active:scale-[0.98] disabled:opacity-50"
-                                >
-                                    {loading ? (
-                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    ) : (
-                                        <>
-                                            {view === 'login' ? 'Login' : 'Create Account'}
-                                            <ArrowRight size={16} />
-                                        </>
-                                    )}
-                                </button>
-                            </form>
-
-                            <div className="mt-8 text-center text-sm">
-                                <span className="text-gray-500">
-                                    {view === 'login'
-                                        ? "Don't have an account?"
-                                        : 'Already have an account?'}
-                                </span>
-                                <button
-                                    onClick={() => setView(view === 'login' ? 'register' : 'login')}
-                                    className="ml-2 font-black border-b-2 border-transparent hover:border-black transition-all"
-                                >
-                                    {view === 'login' ? 'REGISTER' : 'LOGIN'}
-                                </button>
-                            </div>
+                                    <div className="mt-8 text-center text-sm">
+                                        <span className="text-gray-500">
+                                            {view === 'login'
+                                                ? "Don't have an account?"
+                                                : 'Already have an account?'}
+                                        </span>
+                                        <button
+                                            onClick={() => setView(view === 'login' ? 'register' : 'login')}
+                                            className="ml-2 font-black border-b-2 border-transparent hover:border-black transition-all"
+                                        >
+                                            {view === 'login' ? 'REGISTER' : 'LOGIN'}
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </motion.div>

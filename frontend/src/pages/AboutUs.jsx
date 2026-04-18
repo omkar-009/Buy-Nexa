@@ -19,7 +19,7 @@ export default function AboutUs() {
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans overflow-x-hidden pt-20">
+        <div className="min-h-screen bg-white font-sans overflow-x-hidden">
             {/* Hero Section */}
             <div className="relative py-32 bg-black text-white overflow-hidden">
                 <motion.div 

@@ -49,6 +49,14 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (response.data.success) {
+        if (response.data.verificationRequired) {
+          return { 
+            success: true, 
+            verificationRequired: true, 
+            email: response.data.email, 
+            message: response.data.message 
+          };
+        }
         await verifyUser();
         return { success: true, message: response.data.message };
       }
@@ -65,6 +73,48 @@ export const AuthProvider = ({ children }) => {
           error.response?.data?.message ||
           error.response?.data?.error ||
           "Login failed",
+      };
+    }
+  };
+
+  // Verify OTP
+  const verifyOTP = async (verifyData) => {
+    try {
+      const response = await api.post("/user/verify-otp", verifyData, {
+        withCredentials: true,
+      });
+
+      if (response.data.success) {
+        await verifyUser();
+        return { success: true, message: response.data.message };
+      }
+
+      return {
+        success: false,
+        message: response.data.message || "Verification failed",
+      };
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Verification failed",
+      };
+    }
+  };
+
+  // Resend OTP
+  const resendOTP = async (email, type) => {
+    try {
+      const response = await api.post("/user/resend-otp", { email, type });
+      return {
+        success: response.data.success,
+        message: response.data.message,
+      };
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to resend OTP",
       };
     }
   };
@@ -88,6 +138,8 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         login,
+        verifyOTP,
+        resendOTP,
         logout,
         isAuthenticated,
         setUser,

@@ -14,6 +14,7 @@ const authPool = mysql.createPool({ ...dbConfig, database: 'auth_db' });
 const orderPool = mysql.createPool({ ...dbConfig, database: 'order_db' });
 const cartPool = mysql.createPool({ ...dbConfig, database: 'cart_db' });
 const productPool = mysql.createPool({ ...dbConfig, database: 'vcoop' });
+const otpPool = mysql.createPool({ ...dbConfig, database: 'otp_verifications' });
 
 // Test connections
 const testConnection = async (pool, name) => {
@@ -31,6 +32,7 @@ const testConnection = async (pool, name) => {
     await testConnection(orderPool, 'Order');
     await testConnection(cartPool, 'Cart');
     await testConnection(productPool, 'Product');
+    await testConnection(otpPool, 'OTP');
 })();
 
 module.exports = {
@@ -38,4 +40,5 @@ module.exports = {
     orderPool,
     cartPool,
     productPool,
+    otpPool,
 };

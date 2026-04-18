@@ -1,5 +1,6 @@
 const { orderPool: pool, productPool } = require('../config/db');
 const { sendResponse } = require('../utils/response');
+const { sendOrderConfirmationMail } = require('../utils/mail');
 
 // Generate unique order number
 const generateOrderNumber = () => {
@@ -117,6 +118,10 @@ const createOrder = async (req, res, next) => {
                     order.items = [];
                 }
             }
+
+            // Send confirmation email asynchronously (don't wait for it to return response)
+            sendOrderConfirmationMail(userData.email || order.customer_email, order)
+                .catch(err => console.error('Failed to send order confirmation email:', err));
 
             return sendResponse(res, 201, true, 'Order placed successfully', order);
         } catch (error) {

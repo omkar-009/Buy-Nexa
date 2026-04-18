@@ -4,6 +4,8 @@ const handleLogin = require('../middleware/handleLogin');
 const Authorization = require('../middleware/authorization');
 const {
     registerUser,
+    verifyOTP,
+    resendOTP,
     getCurrentUser,
     updateUserProfile,
 } = require('../controllers/user.controller');
@@ -11,6 +13,8 @@ const { refreshToken, logout } = require('../controllers/auth.controller');
 
 // Public routes
 router.post('/register', registerUser);
+router.post('/verify-otp', verifyOTP);
+router.post('/resend-otp', resendOTP);
 router.post('/login', handleLogin);
 router.post('/refresh-token', refreshToken);
 

@@ -1,4 +1,4 @@
-const { authPool: pool } = require('../config/db');
+const { authPool: pool, otpPool } = require('../config/db');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -40,50 +40,25 @@ const handleLogin = async (req, res, next) => {
             });
         }
 
-        const payload = {
-            user_id: user.user_id,
-            username: user.username,
-            email: user.email,
-        };
+        // Generate OTP for login
+        const crypto = require('crypto');
+        const { sendOTPMail } = require('../utils/mail');
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
 
-        // Create tokens
-        const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: '15m',
-        });
-
-        const refreshToken = jwt.sign(
-            payload,
-            process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
-            {
-                expiresIn: '15d',
-            }
+        await otpPool.query(
+            `INSERT INTO otp_verifications (email, otp, type, expires_at)
+             VALUES (?, ?, ?, ?)`,
+            [user.email, otp, 'login', expiresAt]
         );
 
-        // Set Cookies
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        };
-
-        res.cookie('access_token', accessToken, {
-            ...cookieOptions,
-            maxAge: 15 * 60 * 1000,
-        });
-
-        res.cookie('refresh_token', refreshToken, {
-            ...cookieOptions,
-            maxAge: 15 * 24 * 60 * 60 * 1000,
-        });
+        await sendOTPMail(user.email, otp);
 
         return res.status(200).json({
             success: true,
-            message: 'Login successful',
-            user: {
-                user_id: user.user_id,
-                username: user.username,
-                email: user.email,
-            },
+            message: 'OTP sent to your email for verification',
+            email: user.email,
+            verificationRequired: true,
         });
     } catch (error) {
         console.error('Login error:', error);

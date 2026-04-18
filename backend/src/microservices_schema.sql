@@ -122,3 +122,15 @@ CREATE TABLE IF NOT EXISTS product_ratings (
     UNIQUE KEY unique_user_product (product_id, user_id),
     FOREIGN KEY (product_id) REFERENCES home_page_products(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS otp_verifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    otp VARCHAR(10) NOT NULL,
+    type ENUM('registration', 'login') NOT NULL,
+    registration_data JSON DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NOT NULL,
+    INDEX idx_email (email),
+    INDEX idx_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -16,17 +16,17 @@ const ProductCard = ({
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             whileHover={{ y: -8 }}
-            className="flex flex-col bg-white overflow-hidden group cursor-pointer border border-transparent hover:border-black/5 transition-all duration-300 rounded-2xl"
+            className="flex flex-col h-full bg-white overflow-hidden group cursor-pointer border border-transparent hover:border-black/5 transition-all duration-300 rounded-2xl"
             onClick={onClick}
         >
             {/* Image Section */}
-            <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-2xl p-4">
+            <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-2xl">
                 <motion.img
                     whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.6 }}
                     src={product.imageUrls?.[0] || '/placeholder.png'}
                     alt={product.name}
-                    className="w-full h-full object-contain mix-blend-multiply transition-all duration-500"
+                    className="w-full h-full object-cover transition-all duration-500"
                     onError={(e) => {
                         e.target.src = '/placeholder.png';
                     }}
@@ -55,7 +55,8 @@ const ProductCard = ({
             </div>
 
             {/* Product Info */}
-            <div className="py-5 px-1">
+            <div className="py-5 px-1 flex-1 flex flex-col justify-between">
+                <div>
                 <div className="flex justify-between items-start gap-2 mb-1">
                     <h3 className="text-sm font-black text-black uppercase tracking-tight line-clamp-1 flex-1">
                         {product.name}
@@ -67,7 +68,9 @@ const ProductCard = ({
                     {product.quantity}
                 </p>
 
-                {cartQuantity > 0 && (
+                </div>
+
+                {cartQuantity > 0 ? (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -93,6 +96,8 @@ const ProductCard = ({
                             <Plus size={14} />
                         </button>
                     </motion.div>
+                ) : (
+                    <div className="h-[40px]" /> /* Vertical spacer to maintain height when nothing in cart */
                 )}
             </div>
         </motion.div>

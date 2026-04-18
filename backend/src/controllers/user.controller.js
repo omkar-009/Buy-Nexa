@@ -1,6 +1,10 @@
 const bcrypt = require('bcrypt');
-const { authPool: pool } = require('../config/db');
+const crypto = require('crypto');
+const { authPool: pool, otpPool } = require('../config/db');
 const { sendResponse } = require('../utils/response');
+const { sendOTPMail } = require('../utils/mail');
+
+const generateOTP = () => crypto.randomInt(100000, 999999).toString();
 
 // Get current user profile
 const getCurrentUser = async (req, res, next) => {
@@ -84,21 +88,150 @@ const registerUser = async (req, res, next) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert user into database
-        const [result] = await pool.query(
-            `INSERT INTO users 
-                (username, email, contact_number, password_hash, password, created_at)
-                VALUES (?, ?, ?, ?, ?, NOW())`,
-            [username.trim(), email.trim(), contact_no.trim(), hashedPassword, password]
+        // Generate OTP
+        const otp = generateOTP();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+
+        // Store registration data and OTP
+        await otpPool.query(
+            `INSERT INTO otp_verifications (email, otp, type, registration_data, expires_at)
+             VALUES (?, ?, ?, ?, ?)`,
+            [
+                email.trim(),
+                otp,
+                'registration',
+                JSON.stringify({ 
+                    username: username.trim(), 
+                    email: email.trim(), 
+                    contact_no: contact_no.trim(), 
+                    password_hash: hashedPassword,
+                    password: password
+                }),
+                expiresAt,
+            ]
         );
 
+        // Send OTP mail
+        await sendOTPMail(email.trim(), otp);
+
         // Success response
-        return sendResponse(res, 201, true, 'User registered successfully', {
-            userId: result.insertId,
-            username,
-            email,
-            contact_no,
+        return sendResponse(res, 200, true, 'OTP sent to your email for verification', {
+            email: email.trim(),
+            verificationRequired: true
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const verifyOTP = async (req, res, next) => {
+    try {
+        const { email, otp, type } = req.body;
+
+        if (!email || !otp || !type) {
+            return sendResponse(res, 400, false, 'Email, OTP, and type are required');
+        }
+
+        // Check OTP
+        const [rows] = await otpPool.query(
+            `SELECT * FROM otp_verifications 
+             WHERE email = ? AND otp = ? AND type = ? AND expires_at > NOW()
+             ORDER BY created_at DESC LIMIT 1`,
+            [email, otp, type]
+        );
+
+        if (rows.length === 0) {
+            return sendResponse(res, 401, false, 'Invalid or expired OTP');
+        }
+
+        const otpRecord = rows[0];
+
+        if (type === 'registration') {
+            const userData = JSON.parse(otpRecord.registration_data);
+
+            // Double check email/contact didn't get registered in the meantime
+            const [existing] = await pool.query('SELECT user_id FROM users WHERE email = ?', [userData.email]);
+            if (existing.length > 0) return sendResponse(res, 409, false, 'User already registered');
+
+            // Insert user
+            const [result] = await pool.query(
+                `INSERT INTO users 
+                    (username, email, contact_number, password_hash, password, created_at)
+                    VALUES (?, ?, ?, ?, ?, NOW())`,
+                [userData.username, userData.email, userData.contact_no, userData.password_hash, userData.password]
+            );
+
+            // Clean up OTP
+            await otpPool.query('DELETE FROM otp_verifications WHERE email = ?', [email]);
+
+            return sendResponse(res, 201, true, 'User registered successfully', {
+                userId: result.insertId,
+                username: userData.username,
+                email: userData.email,
+            });
+        } else if (type === 'login') {
+            // For login, the tokens are usually issued here. 
+            // We need to fetch the user details to create a token.
+            const [userRows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+            if (userRows.length === 0) return sendResponse(res, 404, false, 'User not found');
+            
+            const user = userRows[0];
+            const jwt = require('jsonwebtoken'); // Require locally or move to top if possible
+            
+            const payload = {
+                user_id: user.user_id,
+                username: user.username,
+                email: user.email,
+            };
+
+            const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
+            const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET, { expiresIn: '15d' });
+
+            const cookieOptions = {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+            };
+
+            res.cookie('access_token', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 });
+            res.cookie('refresh_token', refreshToken, { ...cookieOptions, maxAge: 15 * 24 * 60 * 60 * 1000 });
+
+            // Clean up OTP
+            await otpPool.query('DELETE FROM otp_verifications WHERE email = ?', [email]);
+
+            return sendResponse(res, 200, true, 'Login successful', {
+                user: { user_id: user.user_id, username: user.username, email: user.email }
+            });
+        }
+
+        return sendResponse(res, 400, false, 'Invalid verification type');
+    } catch (error) {
+        next(error);
+    }
+};
+
+const resendOTP = async (req, res, next) => {
+    try {
+        const { email, type } = req.body;
+
+        if (!email || !type) {
+            return sendResponse(res, 400, false, 'Email and type are required');
+        }
+
+        const otp = generateOTP();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+        // Update or Insert OTP
+        await otpPool.query(
+            `INSERT INTO otp_verifications (email, otp, type, expires_at)
+             VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE otp = VALUES(otp), expires_at = VALUES(expires_at), created_at = NOW()`,
+            [email, otp, type, expiresAt]
+        );
+
+        await sendOTPMail(email, otp);
+
+        return sendResponse(res, 200, true, 'New OTP sent to your email');
     } catch (error) {
         next(error);
     }
@@ -180,4 +313,6 @@ module.exports = {
     registerUser,
     getCurrentUser,
     updateUserProfile,
+    verifyOTP,
+    resendOTP,
 };

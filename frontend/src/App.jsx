@@ -1,6 +1,4 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import Cart from './pages/Cart';
 import OrderHistory from './pages/OrderHistory';
@@ -12,14 +10,21 @@ import OrderTracking from './pages/TrackOrder';
 import AboutUs from './pages/AboutUs';
 import BecomeSeller from './pages/BecomeSeller';
 import Layout from './layout/layout';
+import Loader from './components/Loader';
+import { useAuth } from './context/AuthContext';
 import './App.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AnimatePresence } from 'framer-motion';
 
 function App() {
+    const { loading } = useAuth();
+
     return (
-        <AuthProvider>
+        <>
+            <AnimatePresence>
+                {loading && <Loader key="global-loader" fullScreen />}
+            </AnimatePresence>
             <Router>
                 <ToastContainer
                     position="top-right"
@@ -49,7 +54,7 @@ function App() {
                     </Routes>
                 </AnimatePresence>
             </Router>
-        </AuthProvider>
+        </>
     );
 }
 
