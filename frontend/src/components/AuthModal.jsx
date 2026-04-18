@@ -27,7 +27,7 @@ export default function AuthModal({ isOpen, onClose }) {
         try {
             const result = await login({
                 identifier: formData.identifier || formData.email,
-                password: formData.password
+                password: formData.password,
             });
             if (result.success) {
                 toast.success('Welcome back!');
@@ -59,7 +59,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 // Auto login after registration
                 const loginResult = await login({
                     identifier: formData.email,
-                    password: formData.password
+                    password: formData.password,
                 });
                 if (loginResult.success) {
                     onClose();
@@ -81,7 +81,7 @@ export default function AuthModal({ isOpen, onClose }) {
         <AnimatePresence>
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                 {/* Backdrop */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -90,7 +90,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 />
 
                 {/* Modal Content */}
-                <motion.div 
+                <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.95, opacity: 0 }}
@@ -104,16 +104,16 @@ export default function AuthModal({ isOpen, onClose }) {
                                 {view === 'login' ? 'WELCOME BACK.' : 'JOIN THE CLUB.'}
                             </h2>
                             <p className="text-gray-400 font-medium">
-                                {view === 'login' 
-                                    ? 'Access your account and explore the latest drops.' 
+                                {view === 'login'
+                                    ? 'Access your account and explore the latest drops.'
                                     : 'Create an account for a seamless shopping experience.'}
                             </p>
                         </div>
-                        
+
                         {/* Decorative 3D-like circles */}
                         <div className="absolute -bottom-20 -left-20 w-64 h-64 border border-white/10 rounded-full" />
                         <div className="absolute -bottom-10 -left-10 w-48 h-48 border border-white/20 rounded-full" />
-                        
+
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 text-sm font-bold tracking-widest text-gray-500">
                                 <span>Buy Nexa</span>
@@ -125,7 +125,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
                     {/* Form Side (RHS) */}
                     <div className="flex-1 p-8 md:p-12 bg-white relative overflow-y-auto custom-scrollbar">
-                        <button 
+                        <button
                             onClick={onClose}
                             className="absolute right-6 top-6 text-gray-400 hover:text-black transition-colors"
                         >
@@ -138,15 +138,23 @@ export default function AuthModal({ isOpen, onClose }) {
                                     {view === 'login' ? 'Login' : 'Register'}
                                 </h3>
                                 <p className="text-gray-500 text-sm">
-                                    {view === 'login' ? 'Sign in to continue' : 'Enter your details below'}
+                                    {view === 'login'
+                                        ? 'Sign in to continue'
+                                        : 'Enter your details below'}
                                 </p>
                             </div>
 
-                            <form onSubmit={view === 'login' ? handleLogin : handleRegister} className="space-y-4">
+                            <form
+                                onSubmit={view === 'login' ? handleLogin : handleRegister}
+                                className="space-y-4"
+                            >
                                 {view === 'register' && (
                                     <>
                                         <div className="relative">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                            <User
+                                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                                size={18}
+                                            />
                                             <input
                                                 type="text"
                                                 name="username"
@@ -157,7 +165,10 @@ export default function AuthModal({ isOpen, onClose }) {
                                             />
                                         </div>
                                         <div className="relative">
-                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                            <Phone
+                                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                                size={18}
+                                            />
                                             <input
                                                 type="text"
                                                 name="contact_no"
@@ -171,11 +182,16 @@ export default function AuthModal({ isOpen, onClose }) {
                                 )}
 
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                    <Mail
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                        size={18}
+                                    />
                                     <input
-                                        type={view === 'login' ? "text" : "email"}
-                                        name={view === 'login' ? "identifier" : "email"}
-                                        placeholder={view === 'login' ? "Email or Phone" : "Email Address"}
+                                        type={view === 'login' ? 'text' : 'email'}
+                                        name={view === 'login' ? 'identifier' : 'email'}
+                                        placeholder={
+                                            view === 'login' ? 'Email or Phone' : 'Email Address'
+                                        }
                                         required
                                         className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-lg outline-none focus:border-black transition-all"
                                         onChange={handleChange}
@@ -183,7 +199,10 @@ export default function AuthModal({ isOpen, onClose }) {
                                 </div>
 
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                    <Lock
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                        size={18}
+                                    />
                                     <input
                                         type="password"
                                         name="password"
@@ -212,7 +231,9 @@ export default function AuthModal({ isOpen, onClose }) {
 
                             <div className="mt-8 text-center text-sm">
                                 <span className="text-gray-500">
-                                    {view === 'login' ? "Don't have an account?" : "Already have an account?"}
+                                    {view === 'login'
+                                        ? "Don't have an account?"
+                                        : 'Already have an account?'}
                                 </span>
                                 <button
                                     onClick={() => setView(view === 'login' ? 'register' : 'login')}

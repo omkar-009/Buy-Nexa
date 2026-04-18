@@ -22,7 +22,7 @@ export default function ProductsPage() {
                 setError('');
                 const res = await api.get(`/category/${category}`);
                 if (res.data.success) {
-                    setProducts(res.data.data.map(p => ({ ...p, imageUrls: p.imageUrls || [] })));
+                    setProducts(res.data.data.map((p) => ({ ...p, imageUrls: p.imageUrls || [] })));
                 } else {
                     setError(res.data.message || 'Failed to fetch products');
                 }
@@ -41,9 +41,9 @@ export default function ProductsPage() {
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.1
-            }
-        }
+                staggerChildren: 0.1,
+            },
+        },
     };
 
     return (
@@ -53,7 +53,9 @@ export default function ProductsPage() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                            <Link to="/home" className="hover:text-black transition-colors">Home</Link>
+                            <Link to="/home" className="hover:text-black transition-colors">
+                                Home
+                            </Link>
                             <ChevronRight size={12} />
                             <span className="text-black">{category}</span>
                         </div>
@@ -74,7 +76,7 @@ export default function ProductsPage() {
                 <div className="min-h-[400px]">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-32 gap-6">
-                            <motion.div 
+                            <motion.div
                                 animate={{ rotate: 360 }}
                                 transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
                                 className="w-12 h-12 border-4 border-black/10 border-t-black rounded-full"
@@ -86,8 +88,12 @@ export default function ProductsPage() {
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-32 text-center gap-8">
                             <div className="space-y-2">
-                                <h2 className="text-2xl font-black uppercase tracking-tight">{error}</h2>
-                                <p className="text-gray-400">Something went wrong while fetching the collection.</p>
+                                <h2 className="text-2xl font-black uppercase tracking-tight">
+                                    {error}
+                                </h2>
+                                <p className="text-gray-400">
+                                    Something went wrong while fetching the collection.
+                                </p>
                             </div>
                             <button
                                 className="bg-black text-white px-10 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-gray-800 transition-all"
@@ -97,7 +103,7 @@ export default function ProductsPage() {
                             </button>
                         </div>
                     ) : products.length > 0 ? (
-                        <motion.div 
+                        <motion.div
                             variants={containerVariants}
                             initial="hidden"
                             animate="visible"
@@ -110,7 +116,9 @@ export default function ProductsPage() {
                                     onAddToCart={addToCart}
                                     onIncrease={increaseQuantity}
                                     onDecrease={decreaseQuantity}
-                                    cartQuantity={cartItems.find(c => c.id === item.id)?.cartQuantity || 0}
+                                    cartQuantity={
+                                        cartItems.find((c) => c.id === item.id)?.cartQuantity || 0
+                                    }
                                     onClick={() => navigate(`/product/${item.id}`)}
                                 />
                             ))}

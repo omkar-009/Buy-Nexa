@@ -31,7 +31,7 @@ const ProductCard = ({
                         e.target.src = '/placeholder.png';
                     }}
                 />
-                
+
                 {product.discount > 0 && (
                     <div className="absolute top-4 left-4 bg-black text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
                         -{product.discount}%
@@ -62,13 +62,13 @@ const ProductCard = ({
                     </h3>
                     <span className="text-sm font-black text-black shrink-0">₹{product.price}</span>
                 </div>
-                
+
                 <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-4">
                     {product.quantity}
                 </p>
 
                 {cartQuantity > 0 && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="flex items-center justify-between bg-black text-white p-1 rounded-xl"
@@ -82,9 +82,7 @@ const ProductCard = ({
                         >
                             <Minus size={14} />
                         </button>
-                        <span className="text-xs font-black w-8 text-center">
-                            {cartQuantity}
-                        </span>
+                        <span className="text-xs font-black w-8 text-center">{cartQuantity}</span>
                         <button
                             className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white transition-colors"
                             onClick={(e) => {

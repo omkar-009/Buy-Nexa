@@ -11,7 +11,7 @@ import {
     Plus,
     Minus,
     Star,
-    Shield
+    Shield,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -148,7 +148,7 @@ export default function ProductDescription() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
-                <motion.div 
+                <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
                     className="w-10 h-10 border-4 border-black/10 border-t-black rounded-full"
@@ -163,7 +163,10 @@ export default function ProductDescription() {
                 <h2 className="text-2xl font-black uppercase tracking-tight mb-4">
                     {error || 'Product not found'}
                 </h2>
-                <button onClick={() => navigate('/home')} className="bg-black text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-gray-900 transition-all">
+                <button
+                    onClick={() => navigate('/home')}
+                    className="bg-black text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-gray-900 transition-all"
+                >
                     Go Back Home
                 </button>
             </div>
@@ -174,16 +177,20 @@ export default function ProductDescription() {
     const imageUrl = product.imageUrls?.[selectedImageIndex] || '/placeholder.png';
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="max-w-[1440px] mx-auto px-6 py-12 lg:px-8"
         >
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 mb-12 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                <Link to="/home" className="hover:text-black transition-colors">Home</Link>
+                <Link to="/home" className="hover:text-black transition-colors">
+                    Home
+                </Link>
                 <ChevronRight size={12} />
-                <span className="hover:text-black transition-colors">{getCategoryDisplayName(product.category)}</span>
+                <span className="hover:text-black transition-colors">
+                    {getCategoryDisplayName(product.category)}
+                </span>
                 <ChevronRight size={12} />
                 <span className="text-black">{product.name}</span>
             </div>
@@ -191,7 +198,7 @@ export default function ProductDescription() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24">
                 {/* Left Column - Images */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
-                    <motion.div 
+                    <motion.div
                         initial={{ scale: 0.95, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="w-full aspect-square bg-gray-50 rounded-3xl overflow-hidden relative group p-8 flex items-center justify-center"
@@ -220,11 +227,17 @@ export default function ProductDescription() {
                                     key={index}
                                     whileHover={{ y: -5 }}
                                     className={`shrink-0 w-24 h-24 rounded-2xl overflow-hidden cursor-pointer bg-gray-50 border-2 transition-all p-2 ${
-                                        selectedImageIndex === index ? 'border-black' : 'border-transparent'
+                                        selectedImageIndex === index
+                                            ? 'border-black'
+                                            : 'border-transparent'
                                     }`}
                                     onClick={() => setSelectedImageIndex(index)}
                                 >
-                                    <img src={url} alt="" className="w-full h-full object-contain mix-blend-multiply" />
+                                    <img
+                                        src={url}
+                                        alt=""
+                                        className="w-full h-full object-contain mix-blend-multiply"
+                                    />
                                 </motion.div>
                             ))}
                         </div>
@@ -250,30 +263,39 @@ export default function ProductDescription() {
                     <div className="flex items-center gap-4 mb-8 pb-8 border-b border-gray-100">
                         <div className="flex items-center gap-1">
                             {[1, 2, 3, 4, 5].map((star) => (
-                                <Star 
-                                    key={star} 
-                                    size={16} 
-                                    fill={product.rating >= star ? 'black' : 'none'} 
-                                    stroke={product.rating >= star ? 'black' : '#e5e7eb'} 
+                                <Star
+                                    key={star}
+                                    size={16}
+                                    fill={product.rating >= star ? 'black' : 'none'}
+                                    stroke={product.rating >= star ? 'black' : '#e5e7eb'}
                                     className="cursor-pointer"
                                     onClick={() => submitRating(star)}
                                 />
                             ))}
                         </div>
-                        <span className="text-sm font-black tracking-tight">{product.rating?.toFixed(1) || '0.0'}</span>
-                        <span className="text-xs font-medium text-gray-400 uppercase tracking-widest">({product.rating_count || 0} Reviews)</span>
+                        <span className="text-sm font-black tracking-tight">
+                            {product.rating?.toFixed(1) || '0.0'}
+                        </span>
+                        <span className="text-xs font-medium text-gray-400 uppercase tracking-widest">
+                            ({product.rating_count || 0} Reviews)
+                        </span>
                     </div>
 
                     <div className="space-y-8 mb-10">
                         <div>
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 font-sans">Description</h3>
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 font-sans">
+                                Description
+                            </h3>
                             <p className="text-gray-600 leading-relaxed font-medium">
-                                {product.details || "Luxury product designed for the modern lifestyle. Crafted with attention to detail and premium quality materials."}
+                                {product.details ||
+                                    'Luxury product designed for the modern lifestyle. Crafted with attention to detail and premium quality materials.'}
                             </p>
                         </div>
 
                         <div>
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 font-sans">Availability</h3>
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 font-sans">
+                                Availability
+                            </h3>
                             <div className="flex items-center gap-2 text-sm font-bold">
                                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                 <span>In Stock • Ready to ship</span>
@@ -290,15 +312,21 @@ export default function ProductDescription() {
                                 return (
                                     <div className="flex items-center gap-2">
                                         <div className="flex-1 flex items-center justify-between bg-black text-white p-4 rounded-full">
-                                            <button onClick={() => decreaseQuantity(product.id)} className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+                                            <button
+                                                onClick={() => decreaseQuantity(product.id)}
+                                                className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors"
+                                            >
                                                 <Minus size={20} />
                                             </button>
                                             <span className="text-lg font-black">{qty}</span>
-                                            <button onClick={() => increaseQuantity(product.id)} className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+                                            <button
+                                                onClick={() => increaseQuantity(product.id)}
+                                                className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors"
+                                            >
                                                 <Plus size={20} />
                                             </button>
                                         </div>
-                                        <button 
+                                        <button
                                             onClick={() => navigate('/cart')}
                                             className="bg-gray-100 p-5 rounded-full hover:bg-black hover:text-white transition-all shadow-sm"
                                         >
@@ -322,11 +350,15 @@ export default function ProductDescription() {
                     <div className="grid grid-cols-2 gap-4 mt-12">
                         <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-2xl">
                             <Shield size={20} className="text-black" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Secure Checkout</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                Secure Checkout
+                            </span>
                         </div>
                         <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-2xl">
                             <Package size={20} className="text-black" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Fast Delivery</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                Fast Delivery
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -336,15 +368,19 @@ export default function ProductDescription() {
             <div className="border-t border-gray-100 pt-24">
                 <div className="flex justify-between items-end mb-12">
                     <div>
-                        <h2 className="text-3xl font-black uppercase tracking-tighter">You Might Also Like</h2>
-                        <p className="text-gray-400 font-medium tracking-tight">Handpicked alternatives based on your choice.</p>
+                        <h2 className="text-3xl font-black uppercase tracking-tighter">
+                            You Might Also Like
+                        </h2>
+                        <p className="text-gray-400 font-medium tracking-tight">
+                            Handpicked alternatives based on your choice.
+                        </p>
                     </div>
                 </div>
 
                 <div className="relative group">
                     <AnimatePresence>
                         {showLeftArrow && (
-                            <motion.button 
+                            <motion.button
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 20 }}
@@ -367,7 +403,9 @@ export default function ProductDescription() {
                                     onAddToCart={addToCart}
                                     onIncrease={increaseQuantity}
                                     onDecrease={decreaseQuantity}
-                                    cartQuantity={cartItems.find(c => c.id === item.id)?.cartQuantity || 0}
+                                    cartQuantity={
+                                        cartItems.find((c) => c.id === item.id)?.cartQuantity || 0
+                                    }
                                     onClick={() => navigate(`/product/${item.id}`)}
                                 />
                             </div>
@@ -376,7 +414,7 @@ export default function ProductDescription() {
 
                     <AnimatePresence>
                         {showRightArrow && (
-                            <motion.button 
+                            <motion.button
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
@@ -389,7 +427,7 @@ export default function ProductDescription() {
                     </AnimatePresence>
                 </div>
             </div>
-            
+
             <CartNotification
                 message={notification.message}
                 show={notification.show}

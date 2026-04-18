@@ -18,7 +18,7 @@ export default function Navbar() {
     const [showResults, setShowResults] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    
+
     const searchRef = useRef(null);
     const resultsRef = useRef(null);
     const { getTotalItems, getTotalPrice } = useCartStore();
@@ -111,11 +111,13 @@ export default function Navbar() {
 
     return (
         <>
-            <motion.header 
+            <motion.header
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
                 className={`sticky top-0 z-[80] w-full transition-all duration-300 ${
-                    isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 py-2' : 'bg-white py-4'
+                    isScrolled
+                        ? 'bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 py-2'
+                        : 'bg-white py-4'
                 }`}
             >
                 <nav className="max-w-[1440px] mx-auto px-6 flex items-center justify-between gap-8">
@@ -131,9 +133,15 @@ export default function Navbar() {
                     {/* Navigation Links */}
                     <div className="hidden lg:flex items-center gap-8">
                         {['HOME', 'ABOUT US', 'BECOME A SELLER'].map((item) => (
-                            <Link 
+                            <Link
                                 key={item}
-                                to={item === 'HOME' ? '/home' : item === 'ABOUT US' ? '/about' : '/become-seller'}
+                                to={
+                                    item === 'HOME'
+                                        ? '/home'
+                                        : item === 'ABOUT US'
+                                          ? '/about'
+                                          : '/become-seller'
+                                }
                                 className="text-[12px] font-black tracking-[0.1em] text-gray-400 hover:text-black transition-colors no-underline"
                             >
                                 {item}
@@ -146,10 +154,7 @@ export default function Navbar() {
                         className="flex-1 hidden md:flex justify-center max-w-xl relative"
                         ref={searchRef}
                     >
-                        <form
-                            className="relative w-full group"
-                            onSubmit={handleSearchSubmit}
-                        >
+                        <form className="relative w-full group" onSubmit={handleSearchSubmit}>
                             <Search
                                 size={18}
                                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors"
@@ -200,11 +205,16 @@ export default function Navbar() {
                                                 <div
                                                     key={product.id}
                                                     className="flex items-center gap-6 p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer group"
-                                                    onClick={() => handleSearchResultClick(product.id)}
+                                                    onClick={() =>
+                                                        handleSearchResultClick(product.id)
+                                                    }
                                                 >
                                                     <div className="w-16 h-16 rounded-xl overflow-hidden bg-white shrink-0 flex items-center justify-center border border-transparent group-hover:border-black/5 p-2 transition-all">
                                                         <img
-                                                            src={product.imageUrls?.[0] || '/placeholder.png'}
+                                                            src={
+                                                                product.imageUrls?.[0] ||
+                                                                '/placeholder.png'
+                                                            }
                                                             alt={product.name}
                                                             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                                                         />
@@ -219,9 +229,13 @@ export default function Navbar() {
                                                     </div>
                                                 </div>
                                             ))}
-                                            <button 
+                                            <button
                                                 className="w-full p-4 text-[10px] font-black uppercase tracking-widest text-black hover:bg-black hover:text-white transition-all"
-                                                onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`)}
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/search?q=${encodeURIComponent(searchQuery.trim())}`
+                                                    )
+                                                }
                                             >
                                                 View all results
                                             </button>
@@ -243,8 +257,13 @@ export default function Navbar() {
                                 className="group flex items-center gap-2"
                                 onClick={() => navigate('/account')}
                             >
-                                <UserCircle size={22} className="text-gray-400 group-hover:text-black transition-colors" />
-                                <span className="hidden sm:block text-[11px] font-black uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors">ACCOUNT</span>
+                                <UserCircle
+                                    size={22}
+                                    className="text-gray-400 group-hover:text-black transition-colors"
+                                />
+                                <span className="hidden sm:block text-[11px] font-black uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors">
+                                    ACCOUNT
+                                </span>
                             </button>
                         ) : (
                             <button
@@ -255,19 +274,19 @@ export default function Navbar() {
                             </button>
                         )}
 
-                        <button
-                            className="relative group p-2"
-                            onClick={() => navigate('/cart')}
-                        >
-                            <ShoppingCart size={22} className="text-black transition-transform group-hover:-translate-y-0.5" />
+                        <button className="relative group p-2" onClick={() => navigate('/cart')}>
+                            <ShoppingCart
+                                size={22}
+                                className="text-black transition-transform group-hover:-translate-y-0.5"
+                            />
                             {cartItemCount > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-black text-white text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
                                     {cartItemCount}
                                 </span>
                             )}
                         </button>
-                        
-                        <button 
+
+                        <button
                             className="lg:hidden p-2 text-gray-400 hover:text-black transition-colors"
                             onClick={() => setIsMobileMenuOpen(true)}
                         >
@@ -295,7 +314,7 @@ export default function Navbar() {
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                             className="fixed top-0 right-0 bottom-0 w-[300px] bg-white z-[110] p-8 flex flex-col shadow-2xl"
                         >
-                            <button 
+                            <button
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="self-end p-2 text-gray-400 hover:text-black transition-colors mb-12"
                             >
@@ -305,7 +324,14 @@ export default function Navbar() {
                             <div className="flex flex-col gap-8">
                                 {['HOME', 'ABOUT US', 'BECOME A SELLER', 'ACCOUNT'].map((item) => {
                                     if (item === 'ACCOUNT' && !isAuthenticated()) return null;
-                                    const path = item === 'HOME' ? '/home' : item === 'ABOUT US' ? '/about' : item === 'ACCOUNT' ? '/account' : '/become-seller';
+                                    const path =
+                                        item === 'HOME'
+                                            ? '/home'
+                                            : item === 'ABOUT US'
+                                              ? '/about'
+                                              : item === 'ACCOUNT'
+                                                ? '/account'
+                                                : '/become-seller';
                                     return (
                                         <Link
                                             key={item}
