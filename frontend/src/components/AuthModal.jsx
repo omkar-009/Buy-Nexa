@@ -14,6 +14,7 @@ export default function AuthModal({ isOpen, onClose }) {
     const [otp, setOtp] = useState('');
     const [otpType, setOtpType] = useState('login'); // 'login' or 'registration'
     const [resendTimer, setResendTimer] = useState(0);
+    const [verificationEmail, setVerificationEmail] = useState('');
     const [formData, setFormData] = useState({
         identifier: '',
         password: '',
@@ -34,9 +35,10 @@ export default function AuthModal({ isOpen, onClose }) {
             });
             if (result.success) {
                 if (result.verificationRequired) {
+                    setVerificationEmail(result.email);
                     setOtpType('login');
                     setView('otp');
-                    toast.info('Please verify your email');
+                    toast.info('Verification code sent to your email.');
                 } else {
                     toast.success('Welcome back!');
                     onClose();
@@ -65,9 +67,10 @@ export default function AuthModal({ isOpen, onClose }) {
 
             if (response.data.success) {
                 if (response.data.verificationRequired) {
+                    setVerificationEmail(response.data.email);
                     setOtpType('registration');
                     setView('otp');
-                    toast.info('Please verify your email to complete registration');
+                    toast.info('Verification code sent to your email.');
                 } else {
                     toast.success('Account created! Logging you in...');
                     // Auto login after registration
@@ -97,7 +100,7 @@ export default function AuthModal({ isOpen, onClose }) {
         setLoading(true);
         try {
             const result = await verifyOTP({
-                email: formData.email || formData.identifier,
+                email: verificationEmail || formData.email || formData.identifier,
                 otp,
                 type: otpType
             });
@@ -120,7 +123,7 @@ export default function AuthModal({ isOpen, onClose }) {
         if (resendTimer > 0) return;
         
         try {
-            const result = await resendOTP(formData.email || formData.identifier, otpType);
+            const result = await resendOTP(verificationEmail || formData.email || formData.identifier, otpType);
             if (result.success) {
                 toast.success('New OTP sent!');
                 setResendTimer(30);
@@ -202,10 +205,12 @@ export default function AuthModal({ isOpen, onClose }) {
                         <div className="max-w-sm mx-auto h-full flex flex-col justify-center">
                             <div className="mb-8">
                                 <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">
-                                    {view === 'login' ? 'Login' : 'Register'}
+                                    {view === 'otp' ? 'Verify Identity' : view === 'login' ? 'Login' : 'Register'}
                                 </h3>
                                 <p className="text-gray-500 text-sm">
-                                    {view === 'login'
+                                    {view === 'otp'
+                                        ? `Code sent to ${verificationEmail.replace(/(.{3})(.*)(@.*)/, "$1***$3")}`
+                                        : view === 'login'
                                         ? 'Sign in to continue'
                                         : 'Enter your details below'}
                                 </p>

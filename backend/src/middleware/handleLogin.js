@@ -32,6 +32,17 @@ const handleLogin = async (req, res, next) => {
 
         const user = rows[0];
 
+        // Check if user is verified
+        if (!user.is_verified) {
+            return res.status(403).json({
+                success: false,
+                message: 'Account not verified. Please complete registration by verifying your email.',
+                email: user.email,
+                verificationRequired: true,
+                type: 'registration'
+            });
+        }
+
         const isValid = await bcrypt.compare(password, user.password_hash);
         if (!isValid) {
             return res.status(401).json({
@@ -56,7 +67,7 @@ const handleLogin = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: 'OTP sent to your email for verification',
+            message: 'Verification code sent to your email. Please check your inbox.',
             email: user.email,
             verificationRequired: true,
         });

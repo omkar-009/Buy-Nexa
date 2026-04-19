@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     address VARCHAR(255),
     password_hash VARCHAR(255) NOT NULL,
     password VARCHAR(255),
+    is_verified TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

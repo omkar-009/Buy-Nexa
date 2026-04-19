@@ -15,31 +15,9 @@ const getCurrentUser = async (req, res, next) => {
             return sendResponse(res, 401, false, 'User not authenticated');
         }
 
-        // Check if contact_number column exists, if not use contact_no
-        let contactColumn = 'contact_number';
-        try {
-            const [colCheck] = await pool.query(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'contact_number'"
-            );
-            if (colCheck.length === 0) {
-                // Check if contact_no exists instead
-                const [colCheck2] = await pool.query(
-                    "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'contact_no'"
-                );
-                if (colCheck2.length > 0) {
-                    contactColumn = 'contact_no';
-                } else {
-                    // Neither exists, add contact_number
-                    await pool.query('ALTER TABLE users ADD COLUMN contact_number VARCHAR(15)');
-                }
-            }
-        } catch (e) {
-            console.log('Column check error:', e.message);
-        }
-
         // Fetch user from database
         const [rows] = await pool.query(
-            `SELECT user_id, username, email, ${contactColumn} as contact_number, address FROM users WHERE user_id = ?`,
+            `SELECT user_id, username, email, contact_number, address, is_verified FROM users WHERE user_id = ?`,
             [userId]
         );
 
@@ -71,51 +49,51 @@ const registerUser = async (req, res, next) => {
             return sendResponse(res, 400, false, 'Please provide all required fields');
         }
 
-        // Check if email already exists
-        const [emailRows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (emailRows.length > 0) {
-            return sendResponse(res, 409, false, 'User with this email already exists');
-        }
+        // Check if user already exists
+        const [existingUsers] = await pool.query(
+            'SELECT * FROM users WHERE email = ? OR contact_number = ? OR username = ?',
+            [email, contact_no, username]
+        );
 
-        // Check if contact number already exists
-        const [contactRows] = await pool.query('SELECT * FROM users WHERE contact_number = ?', [
-            contact_no,
-        ]);
-        if (contactRows.length > 0) {
-            return sendResponse(res, 409, false, 'User with this contact number already exists');
-        }
-
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
+
+        if (existingUsers.length > 0) {
+            const existingUser = existingUsers[0];
+            if (existingUser.is_verified) {
+                return sendResponse(res, 409, false, 'User already exists and is verified');
+            } else {
+                // Update unverified user's info
+                await pool.query(
+                    `UPDATE users SET username = ?, contact_number = ?, password_hash = ?, password = ? WHERE email = ?`,
+                    [username.trim(), contact_no.trim(), hashedPassword, password, email.trim()]
+                );
+            }
+        } else {
+            // Insert new unverified user
+            await pool.query(
+                `INSERT INTO users (username, email, contact_number, password_hash, password, is_verified, created_at)
+                 VALUES (?, ?, ?, ?, ?, 0, NOW())`,
+                [username.trim(), email.trim(), contact_no.trim(), hashedPassword, password]
+            );
+        }
 
         // Generate OTP
         const otp = generateOTP();
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
 
-        // Store registration data and OTP
+        // Store OTP (registration_data is no longer needed)
         await otpPool.query(
-            `INSERT INTO otp_verifications (email, otp, type, registration_data, expires_at)
-             VALUES (?, ?, ?, ?, ?)`,
-            [
-                email.trim(),
-                otp,
-                'registration',
-                JSON.stringify({ 
-                    username: username.trim(), 
-                    email: email.trim(), 
-                    contact_no: contact_no.trim(), 
-                    password_hash: hashedPassword,
-                    password: password
-                }),
-                expiresAt,
-            ]
+            `INSERT INTO otp_verifications (email, otp, type, expires_at)
+             VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE otp = VALUES(otp), expires_at = VALUES(expires_at), created_at = NOW()`,
+            [email.trim(), otp, 'registration', expiresAt]
         );
 
         // Send OTP mail
         await sendOTPMail(email.trim(), otp);
 
         // Success response
-        return sendResponse(res, 200, true, 'OTP sent to your email for verification', {
+        return sendResponse(res, 200, true, 'Verification code sent to your email. Please check your inbox.', {
             email: email.trim(),
             verificationRequired: true
         });
@@ -147,27 +125,20 @@ const verifyOTP = async (req, res, next) => {
         const otpRecord = rows[0];
 
         if (type === 'registration') {
-            const userData = JSON.parse(otpRecord.registration_data);
+            // Mark user as verified
+            await pool.query('UPDATE users SET is_verified = 1 WHERE email = ?', [email]);
 
-            // Double check email/contact didn't get registered in the meantime
-            const [existing] = await pool.query('SELECT user_id FROM users WHERE email = ?', [userData.email]);
-            if (existing.length > 0) return sendResponse(res, 409, false, 'User already registered');
-
-            // Insert user
-            const [result] = await pool.query(
-                `INSERT INTO users 
-                    (username, email, contact_number, password_hash, password, created_at)
-                    VALUES (?, ?, ?, ?, ?, NOW())`,
-                [userData.username, userData.email, userData.contact_no, userData.password_hash, userData.password]
-            );
+            // Fetch user details for response
+            const [userRows] = await pool.query('SELECT user_id, username, email FROM users WHERE email = ?', [email]);
+            const user = userRows[0];
 
             // Clean up OTP
             await otpPool.query('DELETE FROM otp_verifications WHERE email = ?', [email]);
 
             return sendResponse(res, 201, true, 'User registered successfully', {
-                userId: result.insertId,
-                username: userData.username,
-                email: userData.email,
+                userId: user.user_id,
+                username: user.username,
+                email: user.email,
             });
         } else if (type === 'login') {
             // For login, the tokens are usually issued here. 
@@ -290,7 +261,7 @@ const updateUserProfile = async (req, res, next) => {
 
         // Fetch updated user
         const [updatedRows] = await pool.query(
-            'SELECT user_id, username, email, contact_number, address FROM users WHERE user_id = ?',
+            'SELECT user_id, username, email, contact_number, address, is_verified FROM users WHERE user_id = ?',
             [userId]
         );
 
